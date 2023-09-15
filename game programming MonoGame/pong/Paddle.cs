@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace pong
 {
-     class Paddle
+    class Paddle
     {
         Vector2 position;
         Texture2D sprite;
@@ -14,21 +14,22 @@ namespace pong
         int speed = 5;
 
 
-        
+
         public Paddle(Vector2 _startposition, Texture2D _sprite, Keys _keyup, Keys _keydown)
-        { 
+        {
             position = _startposition;
             sprite = _sprite;
             keyup = _keyup;
             keydown = _keydown;
-            
+
         }
         public void Update()
         {
             keyboard = Keyboard.GetState();
             Keys[] key = keyboard.GetPressedKeys();
 
-            if (keyboard.IsKeyDown(keyup)) {
+            if (keyboard.IsKeyDown(keyup))
+            {
                 position.Y -= speed;
             }
             if (keyboard.IsKeyDown(keydown))
@@ -41,6 +42,18 @@ namespace pong
         {
             _spriteBatch.Draw(sprite, position, Color.White);
         }
-        
+
+        public int Height
+        {
+            get { return sprite.Height; }
+        }
+        public int Width
+        {
+            get { return sprite.Width; }
+        }
+        public Vector2 Position
+        {
+            get { return position; }
+        }
     }
 }

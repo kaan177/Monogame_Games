@@ -28,7 +28,7 @@ namespace pong
             screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
             spriteBatch = new SpriteBatch(GraphicsDevice);
             player1 = new Paddle(new Vector2(0, 0), Content.Load<Texture2D>("rodeSpeler"), Keys.W, Keys.S);
-            ball = new Ball(screenSize/2, Content);
+            ball = new Ball(screenSize/2, Content, player1);
         }
 
         protected override void Update(GameTime gameTime)

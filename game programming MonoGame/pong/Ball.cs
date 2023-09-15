@@ -9,6 +9,7 @@ namespace pong
         Texture2D ball;
         Vector2 position, speed, origin;
         float speedMultiplier;
+        Paddle paddle1, paddle2;
         public void Update()
         {
             position += speed;
@@ -21,26 +22,47 @@ namespace pong
                 speed.Y = -speed.Y;
                 speed *= speedMultiplier;
             }
+            /*
             //temporary value 15 for where the paddlle is
             //TO DO: get texture width from paddle instead
             if (position.X < 0 + 15 + origin.X || position.X > Pong.screenSize.X - 15 - origin.Y)
             {
                 //TO DO: check if colliding with paddle, when true use following code
-                speed.X = -speed.X;
-                speed *= speedMultiplier;
+                if (true)
+                {
+                    speed.X = -speed.X;
+                    speed *= speedMultiplier;
+                }
             }
+            */
+            if(position.X + origin.X >= paddle1.Position.X && position.X - origin.X <= paddle1.Position.X + paddle1.Width && position.Y + origin.Y >= paddle1.Position.Y && position.Y - origin.Y <= paddle1.Position.Y + paddle1.Height)
+            {
+                if (position.X + origin.X >= paddle1.Position.X && position.X <= paddle1.Position.X + paddle1.Width)
+                {
+                    speed.Y = -speed.X;
+                    speed *= speedMultiplier;
+                }
+                else
+                {
+                    speed.X = -speed.X;
+                    speed *= speedMultiplier;
+                }
+                
+            }
+
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
             _spriteBatch.Draw(ball, position - origin, Color.White);
         }
-        public Ball(Vector2 _startPosition, ContentManager _Content)
+        public Ball(Vector2 _startPosition, ContentManager _Content, Paddle _paddle1)
         {
             ball = _Content.Load<Texture2D>("ball");
             origin = new Vector2(ball.Width, ball.Height) / 2;
             position = _startPosition;
-            speed = new Vector2(2, 2);
+            speed = new Vector2(-2, 2);
             speedMultiplier = 1.02f;
+            paddle1 = _paddle1;
         }
 
 
