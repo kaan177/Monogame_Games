@@ -8,7 +8,7 @@ namespace pong
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        public Vector2 screensize;
+        public static Vector2 screenSize;
         Ball ball;
 
         static void Main()
@@ -25,9 +25,9 @@ namespace pong
 
         protected override void LoadContent()
         {
-            screensize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
+            screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            ball = new Ball(screensize/2, Content);
+            ball = new Ball(screenSize/2, Content);
         }
 
         protected override void Update(GameTime gameTime)
