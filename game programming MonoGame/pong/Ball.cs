@@ -55,7 +55,7 @@ namespace pong
         {
             _spriteBatch.Draw(ball, position - origin, Color.White);
         }
-        public Ball(Vector2 _startPosition, ContentManager _Content, Paddle _paddle1)
+        public Ball(Vector2 _startPosition, ContentManager _Content, Paddle _paddle1, Paddle _paddle2)
         {
             ball = _Content.Load<Texture2D>("ball");
             origin = new Vector2(ball.Width, ball.Height) / 2;
@@ -63,6 +63,7 @@ namespace pong
             speed = new Vector2(-2, 2);
             speedMultiplier = 1.02f;
             paddle1 = _paddle1;
+            paddle2 = _paddle2;
         }
 
 

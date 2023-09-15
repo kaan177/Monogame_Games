@@ -62,11 +62,6 @@ namespace pong
                 position.Y = Pong.screenSize.Y - sprite.Height;
             }
         }
-        }
-        public void Draw(SpriteBatch _spriteBatch)
-        {
-            _spriteBatch.Draw(sprite, position, Color.White);
-        }
 
         public int Height
         {

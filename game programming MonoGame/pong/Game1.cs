@@ -37,7 +37,7 @@ namespace pong
             player2 = new Paddle(new Vector2(screenSize.X - player2Tex.Width, screenSize.Y/2 - player2Tex.Height/2), player2Tex, Keys.Up, Keys.Down);
 
             //Constructing the ball.
-            ball = new Ball(screenSize/2, Content);
+            ball = new Ball(screenSize/2, Content, player1, player2);
         }
 
         protected override void Update(GameTime gameTime)
