@@ -8,10 +8,9 @@ namespace pong
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        Paddle player1, player2;
         public static Vector2 screenSize;
         Ball ball;
-
+        Paddle player1, player2;
         static void Main()
         {
             Pong game = new Pong();
