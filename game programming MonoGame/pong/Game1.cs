@@ -33,8 +33,8 @@ namespace pong
             player1Tex = Content.Load<Texture2D>("rodeSpeler");
             player2Tex = Content.Load<Texture2D>("blauweSpeler");
 
-            player1 = new Player(new Vector2(0, screenSize.Y/2 - player1Tex.Height/2), player1Tex, Keys.W, Keys.S, 1);
-            player2 = new Player(new Vector2(screenSize.X - player2Tex.Width, screenSize.Y/2 - player2Tex.Height/2), player2Tex, Keys.Up, Keys.Down, 2);
+            player1 = new Player(new Vector2(0, screenSize.Y/2 - player1Tex.Height/2), player1Tex, Keys.W, Keys.S, 1, Content);
+            player2 = new Player(new Vector2(screenSize.X - player2Tex.Width, screenSize.Y/2 - player2Tex.Height/2), player2Tex, Keys.Up, Keys.Down, 2, Content);
 
             //Constructing the ball.
             ball = new Ball(screenSize/2, Content);

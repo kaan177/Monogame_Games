@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Diagnostics;
@@ -9,7 +10,7 @@ namespace pong
     {   
         //Class variables.
         Vector2 position;
-        Texture2D sprite;
+        Texture2D paddleTex, hearthTex;
         Keys keyup, keydown;
         KeyboardState keyboard;
         int playerId;
@@ -19,16 +20,18 @@ namespace pong
 
 
         
-        public Player(Vector2 _startPosition, Texture2D _sprite, Keys _keyUp, Keys _keyDown, int _playerId)
+        public Player(Vector2 _startPosition, Texture2D _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, ContentManager _content)
         { 
             //Constructing variables.
             position = _startPosition;
-            sprite = _sprite;
+            paddleTex = _paddleTex;
             keyup = _keyUp;
             keydown = _keyDown;
             playerId = _playerId;
             health = maxHealth;
-            
+            hearthTex = _content.Load<Texture2D>("hartje");
+
+
         }
         public void Update()
         {
@@ -37,7 +40,22 @@ namespace pong
         public void Draw(SpriteBatch _spriteBatch)
         {
             //Drawing the sprite.
-            _spriteBatch.Draw(sprite, position, Color.White);
+            _spriteBatch.Draw(paddleTex, position, Color.White);
+            if (playerId == 1)
+            {
+                for (int i = 0; i < health; i++)
+                {
+                    _spriteBatch.Draw(hearthTex, new Vector2(i * hearthTex.Width, 0), Color.White);
+                }
+            }
+            if (playerId == 2)
+            {
+                for (int i = 0; i < health; i++)
+                {
+                    _spriteBatch.Draw(hearthTex, new Vector2(Pong.screenSize.X - (i + 1) * hearthTex.Width, 0), Color.White);
+                }
+            }
+
         }
         
         private void HandleInput()
@@ -62,9 +80,9 @@ namespace pong
                 position.Y = 0;
             }
 
-            if (position.Y > Pong.screenSize.Y - sprite.Height)
+            if (position.Y > Pong.screenSize.Y - paddleTex.Height)
             {
-                position.Y = Pong.screenSize.Y - sprite.Height;
+                position.Y = Pong.screenSize.Y - paddleTex.Height;
             }
         }
 

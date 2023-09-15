@@ -13,7 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin blauweSpeler.png
 #begin bal.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -24,7 +23,31 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
+/build:bal.png;ball.png
+
+#begin blauweSpeler.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
 /build:blauweSpeler.png
+
+#begin hartje.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:hartje.png
 
 #begin rodeSpeler.png
 /importer:TextureImporter
@@ -37,5 +60,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:rodeSpeler.png
-/build:bal.png;ball.png
 

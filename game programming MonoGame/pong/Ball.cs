@@ -9,6 +9,7 @@ namespace pong
         Texture2D ball;
         Vector2 position, speed, origin;
         float speedMultiplier;
+        
         public void Update()
         {
             position += speed;
@@ -34,9 +35,9 @@ namespace pong
         {
             _spriteBatch.Draw(ball, position - origin, Color.White);
         }
-        public Ball(Vector2 _startPosition, ContentManager _Content)
+        public Ball(Vector2 _startPosition, ContentManager _content)
         {
-            ball = _Content.Load<Texture2D>("ball");
+            ball = _content.Load<Texture2D>("ball");
             origin = new Vector2(ball.Width, ball.Height) / 2;
             position = _startPosition;
             speed = new Vector2(2, 2);
