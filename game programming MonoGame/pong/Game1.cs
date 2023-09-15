@@ -4,12 +4,12 @@ using Microsoft.Xna.Framework.Input;
 
 namespace pong
 {
-    public class Game1 : Game
+    public class Pong : Game
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        public Game1()
+        public Pong()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
