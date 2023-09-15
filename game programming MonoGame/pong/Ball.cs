@@ -37,9 +37,10 @@ namespace pong
             */
             if(position.X + origin.X >= paddle1.Position.X && position.X - origin.X <= paddle1.Position.X + paddle1.Width && position.Y + origin.Y >= paddle1.Position.Y && position.Y - origin.Y <= paddle1.Position.Y + paddle1.Height)
             {
+                /*
                 if (position.X + origin.X >= paddle1.Position.X && position.X <= paddle1.Position.X + paddle1.Width)
                 {
-                    speed.Y = -speed.X;
+                    speed.Y = -speed.Y;
                     speed *= speedMultiplier;
                 }
                 else
@@ -47,9 +48,25 @@ namespace pong
                     speed.X = -speed.X;
                     speed *= speedMultiplier;
                 }
-                
+                */
+                speed.X = -speed.X;
             }
-
+            if (position.X + origin.X >= paddle2.Position.X && position.X - origin.X <= paddle2.Position.X + paddle2.Width && position.Y + origin.Y >= paddle2.Position.Y && position.Y - origin.Y <= paddle2.Position.Y + paddle2.Height)
+            {
+                /*
+                if (position.X + origin.X >= paddle2.Position.X && position.X + origin.X <= paddle2.Position.X + paddle2.Width || position.X - origin.X >= paddle2.Position.X && position.X - origin.X <= paddle2.Position.X + paddle2.Width)
+                {
+                    speed.Y = -speed.Y;
+                    speed *= speedMultiplier;
+                }
+                else
+                {
+                    speed.X = -speed.X;
+                    speed *= speedMultiplier;
+                }
+                */
+                speed.X = -speed.X;
+            }
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
