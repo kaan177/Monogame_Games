@@ -9,6 +9,7 @@ namespace pong
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         public static Vector2 screenSize;
+        Texture2D player1Tex, player2Tex;
         Ball ball;
         Paddle player1, player2;
         static void Main()
@@ -27,22 +28,34 @@ namespace pong
         {
             screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            player1 = new Paddle(new Vector2(0, 0), Content.Load<Texture2D>("rodeSpeler"), Keys.W, Keys.S);
+
+            player1Tex = Content.Load<Texture2D>("rodeSpeler");
+            player2Tex = Content.Load<Texture2D>("blauweSpeler");
+
+            player1 = new Paddle(new Vector2(0, screenSize.Y/2 - player1Tex.Height/2), player1Tex, Keys.W, Keys.S);
+            player2 = new Paddle(new Vector2(screenSize.X - player2Tex.Width, screenSize.Y/2 - player2Tex.Height/2), player2Tex, Keys.Up, Keys.Down);
+
             ball = new Ball(screenSize/2, Content);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            ball.Update();                          
+            ball.Update();
+            
             player1.Update();
+            player2.Update();
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
             spriteBatch.Begin();
+
             ball.Draw(spriteBatch);
-            player1.Draw(spriteBatch);
+
+            player1.Draw(spriteBatch); 
+            player2.Draw(spriteBatch);
+
             spriteBatch.End();            
         }
     }

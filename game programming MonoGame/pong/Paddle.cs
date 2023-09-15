@@ -36,6 +36,15 @@ namespace pong
                 position.Y += speed;
                 Debug.Print("keydown werkt");
             }
+            if (position.Y < 0)
+            {
+                position.Y = 0;
+            }
+
+            if (position.Y > Pong.screenSize.Y - sprite.Height)
+            {
+                position.Y = Pong.screenSize.Y - sprite.Height;
+            }
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
