@@ -43,7 +43,7 @@ namespace pong
         protected override void Update(GameTime gameTime)
         {   
             //Updating game objects.
-            ball.Update();
+            ball.Update(gameTime);
             
             player1.Update();
             player2.Update();
