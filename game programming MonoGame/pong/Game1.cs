@@ -8,7 +8,14 @@ namespace pong
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+        Vector2 screensize;
+        Ball ball;
 
+        static void Main()
+        {
+            Pong game = new Pong();
+            game.Run();
+        }
         public Pong()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -16,37 +23,24 @@ namespace pong
             IsMouseVisible = true;
         }
 
-        protected override void Initialize()
-        {
-            // TODO: Add your initialization logic here
-
-            base.Initialize();
-        }
-
         protected override void LoadContent()
         {
+            screensize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
+            ball = new Ball(screensize/2, Content);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
-
-            base.Update(gameTime);
-        }
+            ball.Update();
+        }   
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // TODO: Add your drawing code here
-
-            base.Draw(gameTime);
+            spriteBatch.Begin();
+            ball.Draw(spriteBatch);
+            spriteBatch.End();
         }
     }
 }
