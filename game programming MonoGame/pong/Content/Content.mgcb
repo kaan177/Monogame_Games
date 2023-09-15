@@ -14,6 +14,7 @@
 #---------------------------------- Content ---------------------------------#
 
 #begin blauweSpeler.png
+#begin bal.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -36,4 +37,5 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:rodeSpeler.png
+/build:bal.png;ball.png
 
