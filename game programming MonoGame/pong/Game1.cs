@@ -8,7 +8,7 @@ namespace pong
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        Vector2 screensize;
+        public Vector2 screensize;
         Ball ball;
 
         static void Main()
