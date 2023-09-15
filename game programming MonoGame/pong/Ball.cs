@@ -9,10 +9,26 @@ namespace pong
         Texture2D ball;
         Vector2 position, speed, origin;
         float speedMultiplier;
-
         public void Update()
         {
             position += speed;
+            CheckCollision();
+        }
+        void CheckCollision()
+        {
+            if (position.Y < 0 + origin.Y || position.Y > Pong.screenSize.Y - origin.Y)
+            {
+                speed.Y = -speed.Y;
+                speed *= speedMultiplier;
+            }
+            //temporary value 15 for where the paddlle is
+            //TO DO: get texture width from paddle instead
+            if (position.X < 0 + 15 + origin.X || position.X > Pong.screenSize.X - 15 - origin.Y)
+            {
+                //TO DO: check if colliding with paddle, when true use following code
+                speed.X = -speed.X;
+                speed *= speedMultiplier;
+            }
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
@@ -23,8 +39,10 @@ namespace pong
             ball = _Content.Load<Texture2D>("ball");
             origin = new Vector2(ball.Width, ball.Height) / 2;
             position = _startPosition;
-            speed = new Vector2(1, 1);
+            speed = new Vector2(2, 2);
+            speedMultiplier = 1.02f;
         }
+
 
     }
 }
