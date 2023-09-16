@@ -11,7 +11,7 @@ namespace pong
         Texture2D ball;
         Vector2 position, startPosition, velocity, origin;
         float speedMultiplier, startSpeed, paddleAngleScaler;
-        Paddle paddle1, paddle2;
+        Player paddle1, paddle2;
         double lastBounce;
         int collisionPrecision = 1;
         SoundEffect hitSound, edgeHitSound, borderHitSound;
@@ -43,8 +43,16 @@ namespace pong
         }
         void CheckVerticalBorders()
         {
-            if (position.X + origin.X <= 0 || position.X - origin.X >= Pong.screenSize.X)
+            if (position.X + origin.X <= 0)
+            {
                 Reset();
+                paddle1.TakeDamage(1);
+            }
+            if (position.X - origin.X >= Pong.screenSize.X)
+            {
+                Reset();
+                paddle2.TakeDamage(1);
+            }
         }
         void CheckHorizontalBorders()
         {
@@ -54,7 +62,7 @@ namespace pong
                 borderHitSound.Play();
             }
         }
-        bool CheckPaddle(Paddle paddle)
+        bool CheckPaddle(Player paddle)
         {
             //check for collision with paddle
             if (position.X + origin.X >= paddle.Position.X && position.X - origin.X <= paddle.Position.X + paddle.Width && position.Y + origin.Y >= paddle.Position.Y && position.Y - origin.Y <= paddle.Position.Y + paddle.Height)
@@ -116,7 +124,7 @@ namespace pong
             velocity *= startSpeed;
         }
 
-        public Ball(Vector2 _startPosition, ContentManager _Content, Paddle _paddle1, Paddle _paddle2)
+        public Ball(Vector2 _startPosition, ContentManager _Content, Player _paddle1, Player _paddle2)
         {
             ball = _Content.Load<Texture2D>("ball");
             hitSound = _Content.Load<SoundEffect>("paddleHitSound");

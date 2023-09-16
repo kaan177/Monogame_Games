@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,6 +17,7 @@ namespace pong
         int maxHealth = 3;
         int health;
         int speed = 5;
+        SoundEffect damageSound;
 
 
         
@@ -29,8 +31,7 @@ namespace pong
             playerId = _playerId;
             health = maxHealth;
             hearthTex = _content.Load<Texture2D>("hartje");
-
-
+            damageSound = _content.Load<SoundEffect>("damageSound");
         }
         public void Update()
         {
@@ -44,17 +45,16 @@ namespace pong
             {
                 for (int i = 0; i < health; i++)
                 {
-                    _spriteBatch.Draw(hearthTex, new Vector2(i * hearthTex.Width, 0), Color.White);
+                    _spriteBatch.Draw(hearthTex, new Vector2(20 + i * 2f * hearthTex.Width, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
                 }
             }
             if (playerId == 2)
             {
                 for (int i = 0; i < health; i++)
                 {
-                    _spriteBatch.Draw(hearthTex, new Vector2(Pong.screenSize.X - (i + 1) * hearthTex.Width, 0), Color.White);
+                    _spriteBatch.Draw(hearthTex, new Vector2(Pong.screenSize.X - (i + 1) * 2f * hearthTex.Width - 20, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
                 }
             }
-
         }
         
         private void HandleInput()
@@ -87,6 +87,8 @@ namespace pong
         public void TakeDamage(int damage)
         {
             health -= damage;
+            damageSound.Play();
+
             if (health <= 0)
             {
                 //Code to handle dying
@@ -96,11 +98,11 @@ namespace pong
 
         public int Height
         {
-            get { return sprite.Height; }
+            get { return paddleTex.Height; }
         }
         public int Width
         {
-            get { return sprite.Width; }
+            get { return paddleTex.Width; }
         }
         public Vector2 Position
         {
