@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Diagnostics;
 
 namespace pong
 {
@@ -49,7 +48,6 @@ namespace pong
             if (keyboard.IsKeyDown(keydown))
             {
                 position.Y += speed;
-                Debug.Print("keydown werkt");
             }
             // Resolving collision with the screen.
             if (position.Y < 0)

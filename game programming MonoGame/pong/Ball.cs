@@ -9,15 +9,19 @@ namespace pong
     {
         Texture2D ball;
         Vector2 position, startPosition, velocity, origin;
-        float speedMultiplier, startSpeed;
+        float speedMultiplier, startSpeed, paddleAngleScaler;
         Paddle paddle1, paddle2;
         double lastBounce;
+        int collisionPrecision = 1;
         System.Random random;
 
         public void Update(GameTime _gameTime)
         {
-            position += velocity;
-            CheckCollision(_gameTime);
+            for (int i = 0; i < collisionPrecision; i++)
+            {
+                position += velocity / collisionPrecision;
+                CheckCollision(_gameTime);
+            }
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
@@ -25,56 +29,75 @@ namespace pong
         }
         void CheckCollision(GameTime _gameTime)
         {
-            //check for collison with top and bottom of the screen
+            CheckVerticalBorders();
+            CheckHorizontalBorders();
+            //check if bounce hasn't very recently occured
+            if (_gameTime.TotalGameTime.TotalMilliseconds > lastBounce)
+            {
+                //Cjheck for collisions with paddles
+                if(CheckPaddle(paddle1) || CheckPaddle (paddle2))
+                    lastBounce = _gameTime.TotalGameTime.TotalMilliseconds + 200;
+            } 
+        }
+        void CheckVerticalBorders()
+        {
+            if (position.X + origin.X <= 0 || position.X - origin.X >= Pong.screenSize.X)
+                Reset();
+        }
+        void CheckHorizontalBorders()
+        {
             if (position.Y < 0 + origin.Y || position.Y > Pong.screenSize.Y - origin.Y)
             {
                 velocity.Y = -velocity.Y;
-                velocity *= speedMultiplier;
             }
-            //check if bounce hasn't occured in the last 200 miliseconds
-            if (_gameTime.TotalGameTime.TotalMilliseconds > lastBounce)
+        }
+        bool CheckPaddle(Paddle paddle)
+        {
+            //check for collision with paddle
+            if (position.X + origin.X >= paddle.Position.X && position.X - origin.X <= paddle.Position.X + paddle.Width && position.Y + origin.Y >= paddle.Position.Y && position.Y - origin.Y <= paddle.Position.Y + paddle.Height)
             {
-                //check for collision with paddle 1
-                if (position.X + origin.X >= paddle1.Position.X && position.X - origin.X <= paddle1.Position.X + paddle1.Width && position.Y + origin.Y >= paddle1.Position.Y && position.Y - origin.Y <= paddle1.Position.Y + paddle1.Height)
+                //check whether ball hits from top OR bottom
+                if (position.X > paddle.Position.X && position.X < paddle.Position.X + paddle.Width)
                 {
-                    //check whether ball hits from top OR bottom
-                    if (position.Y + origin.Y >= paddle1.Position.Y + paddle1.Height || position.Y - origin.Y <= paddle1.Position.Y && position.X > paddle1.Position.X && position.X < paddle1.Position.X + paddle1.Width)
-                    {
-                        velocity.Y = -velocity.Y;
-                        velocity *= speedMultiplier;
-                    }
-                    else
-                    {
-                        velocity.X = -velocity.X;
-                        velocity *= speedMultiplier;
-                    }
-                    lastBounce = _gameTime.TotalGameTime.TotalMilliseconds + 200;
+                    velocity.Y = -velocity.Y;
+                    velocity *= speedMultiplier;
                 }
-                //check collision with paddle 2
-                if (position.X + origin.X >= paddle2.Position.X && position.X - origin.X <= paddle2.Position.X + paddle2.Width && position.Y + origin.Y >= paddle2.Position.Y && position.Y - origin.Y <= paddle2.Position.Y + paddle2.Height)
+                else
                 {
-                    //check whether ball hits from top OR bottom
-                    if (position.Y + origin.Y >= paddle2.Position.Y + paddle2.Height || position.Y - origin.Y <= paddle2.Position.Y && position.X > paddle2.Position.X && position.X < paddle2.Position.X + paddle2.Width)
+                    velocity.X = -velocity.X;
+
+                    float distanceToMiddle = (paddle.Position.Y + paddle.Height / 2 - position.Y);
+                    //check for collision near edge of paddle
+                    if (Math.Abs(distanceToMiddle) > paddle.Height / 2 - paddle.Height / 4)
                     {
-                        velocity.Y = -velocity.Y;
-                        velocity *= speedMultiplier;
+                        //mainpulate velocity to end up with altered angle
+                        float currentSpeed = velocity.Length();
+                        velocity.Y -= Math.Sign(distanceToMiddle) * paddleAngleScaler * currentSpeed;
+                        velocity.Normalize();
+                        velocity *= currentSpeed;
                     }
-                    else
-                    {
-                        velocity.X = -velocity.X;
-                        velocity *= speedMultiplier;
-                    }
-                    lastBounce = _gameTime.TotalGameTime.TotalMilliseconds + 200;
+
+                    velocity *= speedMultiplier;
                 }
-            } 
+                return true;
+            }
+            return false;
         }
         void Reset()
         {
             position = startPosition;
-            velocity = new Vector2(random.Next(-10, 10), random.Next(-10, 10));
+
+            int x;
+            int y = random.Next(-10, 10);
+
+            if (random.Next(2) == 0)
+                x = random.Next(-10, -3);
+            else
+                x = random.Next(3, 10);
+
+            velocity = new Vector2(x, y);
             velocity.Normalize();
             velocity *= startSpeed;
-            
         }
 
         public Ball(Vector2 _startPosition, ContentManager _Content, Paddle _paddle1, Paddle _paddle2)
@@ -84,9 +107,11 @@ namespace pong
             startPosition = _startPosition;
             speedMultiplier = 1.05f;
             startSpeed = 3f;
+            paddleAngleScaler = 0.5f;
             paddle1 = _paddle1;
             paddle2 = _paddle2;
             random = new System.Random();
+            collisionPrecision = 10;
             Reset();
         }
 
