@@ -68,11 +68,18 @@ namespace pong
                 }
                 else
                 {
-                    //TO DO: check if not colliding with backside of the paddle
+                    //check if not colliding with backside of the paddle
+                    if (velocity.X < 0 && position.X < paddle.Position.X + paddle.Width / 2)
+                        return false;
+                    else if (velocity.X > 0 && position.X > paddle.Position.X + paddle.Width / 2)
+                        return false;
+
+                    //bounce
                     velocity.X = -velocity.X;
 
-                    float distanceToMiddle = (paddle.Position.Y + paddle.Height / 2 - position.Y);
                     //check for collision near edge of paddle
+                    float distanceToMiddle = (paddle.Position.Y + paddle.Height / 2 - position.Y);
+
                     if (Math.Abs(distanceToMiddle) > paddle.Height / 2 - paddle.Height / 4)
                     {
                         //mainpulate velocity to end up with altered angle
@@ -80,12 +87,11 @@ namespace pong
                         velocity.Y -= Math.Sign(distanceToMiddle) * paddleAngleScaler * currentSpeed;
                         velocity.Normalize();
                         velocity *= currentSpeed;
+
                         edgeHitSound.Play();
                     }
                     else
-                    {
                         hitSound.Play();
-                    }
 
                     velocity *= speedMultiplier;
                 }
@@ -119,7 +125,7 @@ namespace pong
             origin = new Vector2(ball.Width, ball.Height) / 2;
             startPosition = _startPosition;
             speedMultiplier = 1.05f;
-            startSpeed = 5f;
+            startSpeed = 3.5f;
             paddleAngleScaler = 0.5f;
             paddle1 = _paddle1;
             paddle2 = _paddle2;
