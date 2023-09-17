@@ -25,6 +25,7 @@ namespace pong
                 CheckCollision(_gameTime);
             }
         }
+
         public void Draw(SpriteBatch _spriteBatch)
         {
             _spriteBatch.Draw(ball, position - origin, Microsoft.Xna.Framework.Color.White);
@@ -36,11 +37,12 @@ namespace pong
             //check if bounce hasn't very recently occured to avoid bouncing back and forth when the ball ends up within the paddle due to the movement being in steps
             if (_gameTime.TotalGameTime.TotalMilliseconds > lastBounce)
             {
-                //Cjheck for collisions with paddles
+                //Check for collisions with paddles
                 if(CheckPaddle(paddle1) || CheckPaddle (paddle2))
                     lastBounce = _gameTime.TotalGameTime.TotalMilliseconds + 100;
             } 
         }
+
         void CheckVerticalBorders()
         {
             if (position.X + origin.X <= 0)
@@ -54,6 +56,7 @@ namespace pong
                 paddle2.TakeDamage(1);
             }
         }
+
         void CheckHorizontalBorders()
         {
             if (position.Y < 0 + origin.Y || position.Y > Pong.screenSize.Y - origin.Y)
@@ -62,6 +65,7 @@ namespace pong
                 borderHitSound.Play();
             }
         }
+
         bool CheckPaddle(Player paddle)
         {
             //check for collision with paddle
@@ -107,7 +111,8 @@ namespace pong
             }
             return false;
         }
-        void Reset()
+
+        public void Reset()
         {
             position = startPosition;
 
@@ -138,7 +143,7 @@ namespace pong
             paddle1 = _paddle1;
             paddle2 = _paddle2;
             random = new System.Random();
-            collisionPrecision = 100;
+            collisionPrecision = 10;
             Reset();
         }
 

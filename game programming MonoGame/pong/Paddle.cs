@@ -7,9 +7,10 @@ using Microsoft.Xna.Framework.Input;
 namespace pong
 {
      class Player
-    {   
+    {
         //Class variables.
-        Vector2 position;
+        Pong pong;
+        Vector2 position, startPosition;
         Texture2D paddleTex, hearthTex;
         Keys keyup, keydown;
         KeyboardState keyboard;
@@ -21,10 +22,12 @@ namespace pong
 
 
         
-        public Player(Vector2 _startPosition, Texture2D _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, ContentManager _content)
-        { 
-            //Constructing variables.
-            position = _startPosition;
+        public Player(Vector2 _startPosition, Texture2D _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, ContentManager _content, Pong _pong)
+        {
+            //Constructing variables.        
+            pong = _pong;
+            startPosition = _startPosition;
+            position = startPosition;
             paddleTex = _paddleTex;
             keyup = _keyUp;
             keydown = _keyDown;
@@ -91,9 +94,14 @@ namespace pong
 
             if (health <= 0)
             {
-                //Code to handle dying
-
+                pong.GameOver(playerId);
             }
+        }
+
+        public void Reset()
+        {
+            health = maxHealth;
+            position = startPosition;
         }
 
         public int Height
