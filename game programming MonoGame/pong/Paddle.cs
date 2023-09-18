@@ -17,7 +17,7 @@ namespace pong
         int playerId;
         int maxHealth = 3;
         int health;
-        int speed = 5;
+        int speed = 6;
         SoundEffect damageSound;
 
 
@@ -98,9 +98,14 @@ namespace pong
             }
         }
 
-        public void Reset()
+        public void GameReset()
         {
             health = maxHealth;
+            position = startPosition;
+        }
+
+        public void Reset()
+        {
             position = startPosition;
         }
 

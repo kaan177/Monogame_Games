@@ -90,8 +90,8 @@ namespace pong
                 if (lastGameState != gameState)
                 {
                     ball.Reset();
-                    player1.Reset();
-                    player2.Reset();
+                    player1.GameReset();
+                    player2.GameReset();
                 }
 
                 ball.Update(gameTime);
