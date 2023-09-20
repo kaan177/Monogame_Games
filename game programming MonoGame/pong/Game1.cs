@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Drawing.Imaging;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using pong.Content;
 
 namespace pong
 {
@@ -20,6 +22,7 @@ namespace pong
 
         Ball ball;
         Player player1, player2;
+        Emotes emotes;
 
         string dynamicGameOverText, gameOverText, welcomeText;
         Vector2 dynamicGameOverTextOrigin, gameOverTextOrigin, welcomeTextOrigin;
@@ -64,6 +67,8 @@ namespace pong
 
             //Constructing the ball.
             ball = new Ball(screenSize / 2, Content, player1, player2);
+
+            emotes = new Emotes(Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -78,6 +83,7 @@ namespace pong
 
             if (gameState == GameState.GameOver)
             {
+                emotes.HandleInput(gameTime);
                 KeyboardState keyboard = Keyboard.GetState();
                 if (keyboard.IsKeyDown(Keys.Space))
                     gameState = GameState.Playing;
@@ -97,6 +103,7 @@ namespace pong
                 ball.Update(gameTime);
                 player1.Update();
                 player2.Update();
+                emotes.HandleInput(gameTime);
             }
         }
 
@@ -114,6 +121,7 @@ namespace pong
                 ball.Draw(spriteBatch);
                 player1.Draw(spriteBatch);
                 player2.Draw(spriteBatch);
+                emotes.Draw(spriteBatch);
             }
             if (gameState == GameState.GameOver)
             {
@@ -121,6 +129,7 @@ namespace pong
                 player2.Draw(spriteBatch);
                 spriteBatch.DrawString(standardFont, dynamicGameOverText, CenterOfScreen - dynamicGameOverTextOrigin - new Vector2(0, gameOverTextOrigin.Y * 1.1f), gameOverColor);
                 spriteBatch.DrawString(standardFont, gameOverText, CenterOfScreen - gameOverTextOrigin + new Vector2(0, dynamicGameOverTextOrigin.Y * 1.1f), Color.White);
+                emotes.Draw(spriteBatch);
             }
 
             spriteBatch.End();

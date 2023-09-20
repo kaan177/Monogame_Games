@@ -67,6 +67,24 @@
 /processorParam:TextureFormat=Color
 /build:hartje.png
 
+#begin hihihahSound.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:hihihahSound.mp3
+
+#begin hihihihahTexture.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:hihihihahTexture.png
+
 #begin paddleHitSound.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
