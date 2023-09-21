@@ -3,57 +3,62 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
-using System.Data;
 
 namespace pong
 {
-    class Ball
+    class Ball : GameObject
     {
-        Texture2D ball;
         SoundEffect hitSound, edgeHitSound, borderHitSound;
 
-        Vector2 position, startPosition, velocity, origin;
+        Player player1, player2;
+
+        //variables for adjusting the feel of the game
         float speedMultiplier, startSpeed, paddleAngleScaler;
-        float lastBounce, lastFlicker, flickerTime;
 
-        int collisionPrecision = 1;
+        //varoiable used to wait before checking collisions again 
+        float lastBounce;
+
+        //variables for flickering
+        float lastFlicker, flickerTime;
         int totalFlickers;
-
         bool flicker, renderBall;
 
-        Player paddle1, paddle2;
-        System.Random random;
+        public Ball(Vector2 _startPosition, ContentManager _content, Player _player1, Player _player2) : base(_content, "ball", _startPosition)
+        {
+            hitSound = _content.Load<SoundEffect>("paddleHitSound");
+            edgeHitSound = _content.Load<SoundEffect>("edgeHitSound");
+            borderHitSound = _content.Load<SoundEffect>("borderHitSound");
+            player1 = _player1;
+            player2 = _player2;
+            speedMultiplier = 1.05f;
+            startSpeed = 420f;
+            paddleAngleScaler = 0.5f;
+            flickerTime = 0.33f;
+        }
 
-        public void Update(GameTime _gameTime)
+        public override void Update(GameTime gameTime)
         {
             if (flicker == true)
             {
-                if(_gameTime.TotalGameTime.TotalSeconds > lastFlicker)
-                {
-                    lastFlicker = (float)_gameTime.TotalGameTime.TotalSeconds + flickerTime;
-                    renderBall = !renderBall;
-                    totalFlickers++;
-                    if(totalFlickers > 6)
-                    {
-                        flicker = false;
-                        totalFlickers = 0;
-                    }
-                }
+                Flicker(gameTime);
             }
             else
             {
-                for (int i = 0; i < collisionPrecision; i++)
+                //temporary fix for phasing through paddles
+                for (int i = 0; i < 10; i++)
                 {
-                    position += velocity / collisionPrecision;
-                    CheckCollision(_gameTime);
+                    velocity /= 10f;
+                    base.Update(gameTime);
+                    velocity *= 10f;
+                    CheckCollision(gameTime);
                 }
             }
         }
 
-        public void Draw(SpriteBatch _spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             if(renderBall)
-                _spriteBatch.Draw(ball, position - origin, Microsoft.Xna.Framework.Color.White);
+                base.Draw(spriteBatch);
         }
         void CheckCollision(GameTime _gameTime)
         {
@@ -63,7 +68,7 @@ namespace pong
             if (_gameTime.TotalGameTime.TotalMilliseconds > lastBounce)
             {
                 //Check for collisions with paddles
-                if(CheckPaddle(paddle1) || CheckPaddle (paddle2))
+                if (CheckPaddle(player1) || CheckPaddle(player2))
                     lastBounce = (float)_gameTime.TotalGameTime.TotalMilliseconds + 100f;
             } 
         }
@@ -73,18 +78,18 @@ namespace pong
             if (position.X + origin.X <= 0)
             {
                 Reset();
-                paddle1.Reset();
-                paddle2.Reset();
+                player1.Reset();
+                player2.Reset();
 
-                paddle1.TakeDamage(1);
+                player1.TakeDamage(1);
             }
             if (position.X - origin.X >= Pong.screenSize.X)
             {
                 Reset();
-                paddle1.Reset();
-                paddle2.Reset();
+                player1.Reset();
+                player2.Reset();
 
-                paddle2.TakeDamage(1);
+                player2.TakeDamage(1);
             }
         }
 
@@ -97,13 +102,13 @@ namespace pong
             }
         }
 
-        bool CheckPaddle(Player paddle)
+        bool CheckPaddle(Player player)
         {
             //check for collision with paddle
-            if (position.X + origin.X >= paddle.Position.X && position.X - origin.X <= paddle.Position.X + paddle.Width && position.Y + origin.Y >= paddle.Position.Y && position.Y - origin.Y <= paddle.Position.Y + paddle.Height)
+            if (position.X + origin.X >= player.CollisionPosition.X && position.X - origin.X <= player.CollisionPosition.X + player.Width && position.Y + origin.Y >= player.CollisionPosition.Y && position.Y - origin.Y <= player.CollisionPosition.Y + player.Height)
             {
                 //check whether ball hits from top OR bottom
-                if (position.X > paddle.Position.X && position.X < paddle.Position.X + paddle.Width)
+                if (position.X > player.CollisionPosition.X && position.X < player.CollisionPosition.X + player.Width)
                 {
                     velocity.Y = -velocity.Y;
                     velocity *= speedMultiplier;
@@ -111,19 +116,19 @@ namespace pong
                 }
                 else
                 {
-                    //check if not colliding with backside of the paddle
-                    if (velocity.X < 0 && position.X < paddle.Position.X + paddle.Width / 2)
+                    //check if not colliding with backside of the player
+                    if (velocity.X < 0 && position.X < player.CollisionPosition.X + player.Width / 2)
                         return false;
-                    else if (velocity.X > 0 && position.X > paddle.Position.X + paddle.Width / 2)
+                    else if (velocity.X > 0 && position.X > player.CollisionPosition.X + player.Width / 2)
                         return false;
 
                     //bounce
                     velocity.X = -velocity.X;
 
-                    //check for collision near edge of paddle
-                    float distanceToMiddle = (paddle.Position.Y + paddle.Height / 2 - position.Y);
+                    //check for collision near edge of player
+                    float distanceToMiddle = (player.CollisionPosition.Y + player.Height / 2 - position.Y);
 
-                    if (Math.Abs(distanceToMiddle) > paddle.Height / 2 - paddle.Height / 4)
+                    if (Math.Abs(distanceToMiddle) > player.Height / 2 - player.Height / 4)
                     {
                         //mainpulate velocity to end up with altered angle
                         float currentSpeed = velocity.Length();
@@ -142,46 +147,43 @@ namespace pong
             }
             return false;
         }
-
-        public void Reset()
+       public override void Reset()
         {
-            position = startPosition;
+            base.Reset();
             flicker = true;
             renderBall = false;
-
+            RandomDirection();
+        }
+        void RandomDirection()
+        {
+            //calculate random direction that excludes directions that are close to exclusively vertical
             int x;
-            int y = random.Next(-10, 10);
+            int y = Pong.Random.Next(-10, 10);
 
-            if (random.Next(2) == 0)
-                x = random.Next(-10, -5);
+            if (Pong.Random.Next(2) == 0)
+                x = Pong.Random.Next(-10, -5);
             else
-                x = random.Next(5, 10);
+                x = Pong.Random.Next(5, 10);
 
+            //assign random direction to velocity
             velocity = new Vector2(x, y);
             velocity.Normalize();
             velocity *= startSpeed;
         }
-
-        public Ball(Vector2 _startPosition, ContentManager _Content, Player _paddle1, Player _paddle2)
+        void Flicker(GameTime gameTime)
         {
-            ball = _Content.Load<Texture2D>("ball");
-            hitSound = _Content.Load<SoundEffect>("paddleHitSound");
-            edgeHitSound = _Content.Load<SoundEffect>("edgeHitSound");
-            borderHitSound = _Content.Load<SoundEffect>("borderHitSound");
-            origin = new Vector2(ball.Width, ball.Height) / 2;
-            startPosition = _startPosition;
-            speedMultiplier = 1.05f;
-            startSpeed = 7f;
-            paddleAngleScaler = 0.5f;
-            paddle1 = _paddle1;
-            paddle2 = _paddle2;
-            random = new System.Random();
-            collisionPrecision = 10;
-            flickerTime = 0.33f;
-            Reset();
+            if (gameTime.TotalGameTime.TotalSeconds > lastFlicker)
+            {
+                lastFlicker = (float)gameTime.TotalGameTime.TotalSeconds + flickerTime;
+                renderBall = !renderBall;
+                totalFlickers++;
+                if (totalFlickers > 6)
+                {
+                    flicker = false;
+                    totalFlickers = 0;
+                }
+            }
         }
-
-
     }
 }
 
