@@ -30,6 +30,7 @@ namespace pong
         public virtual void Reset()
         {
             position = startPosition;
+            lastPosition = position;
         }
     }
 }

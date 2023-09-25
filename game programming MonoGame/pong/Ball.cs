@@ -61,7 +61,7 @@ namespace pong
 
         void CheckVerticalBorders()
         {
-            if (position.X + origin.X <= 0)
+            if (position.X <= -origin.X)
             {
                 Reset();
                 player1.Reset();
@@ -69,7 +69,7 @@ namespace pong
 
                 player1.TakeDamage(1);
             }
-            if (position.X - origin.X >= Pong.screenSize.X)
+            if (position.X >= Pong.screenSize.X + origin.X)
             {
                 Reset();
                 player1.Reset();
@@ -115,13 +115,16 @@ namespace pong
             Vector2 topLeftLastBound = new Vector2(player.OriginAdjustedLastPosition.X - origin.X, player.OriginAdjustedLastPosition.Y - origin.Y);
             Vector2 bottomRightLastBound = new Vector2(player.OriginAdjustedLastPosition.X + origin.X + player.Width, player.OriginAdjustedLastPosition.Y + origin.Y + player.Height);
 
-            //check if the player has moved through the ball between frames and if so move the ball by the same amount the player moved. This is to prevent the ball from getting stuck inside the player
+            //check if the player has moved through the ball between frames and if so move the ball by the same amount the player moved. This is to prevent the ball from getting stuck inside the player. Also check for the last position of the ball to catch edge cases
             //note: the bouncing isn't calculated here, even though its likely that it should. The reasons are that the exact collision position remains unknown and that the player might move in the same vertical direction as the ball
             if ((position.X > topLeftBound.X || lastPosition.X > topLeftBound.X) && (position.X < bottomRightBound.X || lastPosition.X < bottomRightBound.X))
             {
-                Vector2? playerIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftBound + new Vector2(origin.X, 0f), topLeftBound - topLeftLastBound, position.Y, null, null);
-                Vector2? playerIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightBound - new Vector2(origin.X, 0f), bottomRightBound - bottomRightLastBound, position.Y, null, null);
-                if (playerIntersectionBottom.HasValue || playerIntersectionTop.HasValue)
+                Vector2? playerBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, position.Y, null, null);
+                Vector2? playerLastBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, lastPosition.Y, null, null);
+                Vector2? playerBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, position.Y, null, null);
+                Vector2? playerLastBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, lastPosition.Y, null, null);
+
+                if (playerBallIntersectionBottom.HasValue || playerBallIntersectionTop.HasValue || playerLastBallIntersectionBottom.HasValue || playerLastBallIntersectionTop.HasValue)
                 {
                     lastPosition += (bottomRightBound - bottomRightLastBound);
                     position += (bottomRightBound - bottomRightLastBound);

@@ -6,7 +6,7 @@ namespace pong
     {
         public static Vector2? VerticalIntersection(Vector2 supportVector, Vector2 directionVector, float xCoordinate, float? minY, float? maxY)
         {
-            //Check if directionVector.X is not zero(it would break the code and it would never collide anyways with the Y axis)
+            //Check if directionVector.X is not zero(it would break the code and it would never collide with the Y axis anyways)
             if (directionVector.X == 0f)
                 return null;
 
@@ -34,7 +34,7 @@ namespace pong
         }
         public static Vector2? HorizontalIntersection(Vector2 supportVector, Vector2 directionVector, float yCoordinate, float? minX, float? maxX)
         {
-            //Check if directionVector.Y is not zero(it would break the code and it would never collide anyways with the X axis)
+            //Check if directionVector.Y is not zero(it would break the code and it would never collide with the X axis anyways)
             if (directionVector.Y == 0f)
                 return null;
 
@@ -91,7 +91,7 @@ namespace pong
             if (possiblePos3.HasValue)
             {
                 distance3 = (possiblePos3.Value - supportVector).Length();
-                if (distance3 < distance2 && distance3 < distance2)
+                if (distance3 < distance2 && distance3 < distance1)
                     collisionPosition = possiblePos3.Value;
             }
             if (possiblePos4.HasValue)

@@ -20,8 +20,8 @@ namespace pong
 
         SpriteFont standardFont;
 
-        static Ball ball;
-        static Player player1, player2;
+        Ball ball;
+        Player player1, player2;
         Emotes emotes;
 
         string dynamicGameOverText, gameOverText, welcomeText;
