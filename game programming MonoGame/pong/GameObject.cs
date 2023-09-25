@@ -6,14 +6,16 @@ namespace pong
 {
     class GameObject
     {
+        protected Pong pong;
         protected Texture2D texture;
         protected Vector2 position, lastPosition, startPosition, velocity, origin;
-        protected GameObject(ContentManager _content, string _textureString, Vector2 _startPosition)
+        protected GameObject(ContentManager _content, string _textureString, Vector2 _startPosition, Pong _pong)
         {
             velocity = Vector2.Zero;
             startPosition = _startPosition;
             texture = _content.Load<Texture2D>(_textureString);
             origin = new Vector2(texture.Width, texture.Height) / 2;
+            pong = _pong;
             Reset();
         }
 

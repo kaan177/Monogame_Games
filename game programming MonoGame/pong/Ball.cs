@@ -3,14 +3,13 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
+using System.Collections.Generic;
 
 namespace pong
 {
     class Ball : GameObject
     {
         SoundEffect hitSound, edgeHitSound, borderHitSound;
-
-        Player player1, player2;
 
         //variables for adjusting the feel of the game
         float speedMultiplier, startSpeed, playerAngleScaler;
@@ -20,13 +19,11 @@ namespace pong
         int totalFlickers;
         bool flicker, renderBall;
 
-        public Ball(Vector2 _startPosition, ContentManager _content, Player _player1, Player _player2) : base(_content, "ball", _startPosition)
+        public Ball(Vector2 _startPosition, ContentManager _content, Pong _pong) : base(_content, "ball", _startPosition, _pong)
         {
             hitSound = _content.Load<SoundEffect>("paddleHitSound");
             edgeHitSound = _content.Load<SoundEffect>("edgeHitSound");
             borderHitSound = _content.Load<SoundEffect>("borderHitSound");
-            player1 = _player1;
-            player2 = _player2;
             speedMultiplier = 1.03f;
             startSpeed = 320f;
             playerAngleScaler = 0.5f;
@@ -53,29 +50,87 @@ namespace pong
         }
         void CheckCollision(GameTime _gameTime)
         {
-            CheckPaddle(player1);
-            CheckPaddle(player2);
+            foreach (Player player in pong.Players)
+            {
+                if(player.IsAlive)
+                    CheckPaddle(player);
+            }
             CheckVerticalBorders();
             CheckHorizontalBorders();
         }
 
         void CheckVerticalBorders()
         {
-            if (position.X <= -origin.X)
+            if (!pong.IsFourPlayers)
             {
-                Reset();
-                player1.Reset();
-                player2.Reset();
-
-                player1.TakeDamage(1);
+                if (position.X <= -origin.X)
+                {
+                    Reset();
+                    foreach (Player player in pong.Players)
+                    {
+                        player.Reset();
+                    }
+                    pong.Players[0].TakeDamage(1);
+                }
+                if (position.X >= Pong.screenSize.X + origin.X)
+                {
+                    Reset();
+                    foreach (Player player in pong.Players)
+                    {
+                        player.Reset();
+                    }
+                    pong.Players[1].TakeDamage(1);
+                }
             }
-            if (position.X >= Pong.screenSize.X + origin.X)
+            else
             {
-                Reset();
-                player1.Reset();
-                player2.Reset();
+                //create variables for checking whether the ball bounces with the side while calculating the correct collision position
+                Vector2 directionVector = position - lastPosition;
+                Vector2? intersectionTop = CollisionHelper.VerticalIntersection(lastPosition, directionVector, origin.X, null, null);
+                Vector2? intersectionBottom = CollisionHelper.VerticalIntersection(lastPosition, directionVector, Pong.screenSize.X - origin.Y, null, null);
 
-                player2.TakeDamage(1);
+                //Check whether a collision should occur
+                if (intersectionTop.HasValue || intersectionBottom.HasValue)
+                {
+                    Vector2 collisionPosition;
+                    if (intersectionTop.HasValue)
+                    {
+                        collisionPosition = intersectionTop.Value;
+                        if (pong.Players[0].IsAlive)
+                        {
+                            pong.Players[0].TakeDamage(1);
+                            Reset();
+                            foreach (Player player in pong.Players)
+                            {
+                                player.Reset();
+                            }
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        collisionPosition = intersectionBottom.Value;
+                        if (pong.Players[1].IsAlive)
+                        {
+                            pong.Players[1].TakeDamage(1);
+                            Reset();
+                            foreach (Player player in pong.Players)
+                            {
+                                player.Reset();
+                            }
+                            return;
+                        }
+                    }
+                    //bounce 
+                    velocity.X = -velocity.X;
+                    borderHitSound.Play();
+
+                    //code for making up for lost distance from phasing through the border(noticable at high speeds)
+                    Vector2 lostDistance = position - collisionPosition;
+                    position = collisionPosition;
+                    lastPosition = position;
+                    position += new Vector2(-lostDistance.X, lostDistance.Y);
+                }
             }
         }
 
@@ -90,10 +145,34 @@ namespace pong
             if (intersectionTop.HasValue || intersectionBottom.HasValue)
             {
                 Vector2 collisionPosition;
-                if(intersectionTop.HasValue)
+                if (intersectionTop.HasValue)
+                {
                     collisionPosition = intersectionTop.Value;
+                    if (pong.IsFourPlayers && pong.Players[2].IsAlive)
+                    {
+                        pong.Players[2].TakeDamage(1);
+                        Reset();
+                        foreach (Player player in pong.Players)
+                        {
+                            player.Reset();
+                        }
+                        return;
+                    }
+                }
                 else
+                {
                     collisionPosition = intersectionBottom.Value;
+                    if (pong.IsFourPlayers && pong.Players[3].IsAlive)
+                    {
+                        pong.Players[3].TakeDamage(1);
+                        Reset();
+                        foreach (Player player in pong.Players)
+                        {
+                            player.Reset();
+                        }
+                        return;
+                    }
+                }
 
                 //bounce 
                 velocity.Y = -velocity.Y;
@@ -103,7 +182,8 @@ namespace pong
                 Vector2 lostDistance = position - collisionPosition;
                 position = collisionPosition;
                 lastPosition = position;
-                position += new Vector2(lostDistance.X, -lostDistance.Y);            
+                position += new Vector2(lostDistance.X, -lostDistance.Y);      
+
             }
         }
 
@@ -117,17 +197,40 @@ namespace pong
 
             //check if the player has moved through the ball between frames and if so move the ball by the same amount the player moved. This is to prevent the ball from getting stuck inside the player. Also check for the last position of the ball to catch edge cases
             //note: the bouncing isn't calculated here, even though its likely that it should. The reasons are that the exact collision position remains unknown and that the player might move in the same vertical direction as the ball
-            if ((position.X > topLeftBound.X || lastPosition.X > topLeftBound.X) && (position.X < bottomRightBound.X || lastPosition.X < bottomRightBound.X))
+            if (player.IsVertical)
             {
-                Vector2? playerBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, position.Y, null, null);
-                Vector2? playerLastBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, lastPosition.Y, null, null);
-                Vector2? playerBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, position.Y, null, null);
-                Vector2? playerLastBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, lastPosition.Y, null, null);
-
-                if (playerBallIntersectionBottom.HasValue || playerBallIntersectionTop.HasValue || playerLastBallIntersectionBottom.HasValue || playerLastBallIntersectionTop.HasValue)
+                if ((position.X > topLeftBound.X || lastPosition.X > topLeftBound.X) && (position.X < bottomRightBound.X || lastPosition.X < bottomRightBound.X))
                 {
-                    lastPosition += (bottomRightBound - bottomRightLastBound);
-                    position += (bottomRightBound - bottomRightLastBound);
+                    Vector2? playerBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, position.Y, null, null);
+                    Vector2? playerLastBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, lastPosition.Y, null, null);
+                    Vector2? playerBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, position.Y, null, null);
+                    Vector2? playerLastBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, lastPosition.Y, null, null);
+                
+                    //check if the paddle has indeed collided
+                    if (playerBallIntersectionTop.HasValue || playerBallIntersectionBottom.HasValue || playerLastBallIntersectionTop.HasValue || playerLastBallIntersectionBottom.HasValue)
+                    {
+                        //add the amount the paddle has moved to the ball to resolve the issue
+                        lastPosition += (bottomRightBound - bottomRightLastBound);
+                        position += (bottomRightBound - bottomRightLastBound);
+                    }
+                }
+            }
+            else
+            {
+                if ((position.Y > topLeftBound.Y || lastPosition.Y > topLeftBound.Y) && (position.Y < bottomRightBound.Y || lastPosition.Y < bottomRightBound.Y))
+                {
+                    Vector2? playerBallIntersectionLeft = CollisionHelper.VerticalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, position.X, null, null);
+                    Vector2? playerLastBallIntersectionLeft = CollisionHelper.VerticalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, lastPosition.X, null, null);
+                    Vector2? playerBallIntersectionRigth = CollisionHelper.VerticalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, position.X, null, null);
+                    Vector2? playerLastBallIntersectionRight = CollisionHelper.VerticalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, lastPosition.X, null, null);
+
+                    //check if the paddle has indeed collided
+                    if (playerBallIntersectionLeft.HasValue || playerBallIntersectionRigth.HasValue || playerLastBallIntersectionLeft.HasValue || playerLastBallIntersectionRight.HasValue)
+                    {
+                        //add the amount the paddle has moved to the ball to resolve the issue
+                        lastPosition += (bottomRightBound - bottomRightLastBound);
+                        position += (bottomRightBound - bottomRightLastBound);
+                    }
                 }
             }
 
@@ -137,11 +240,24 @@ namespace pong
             {
                 Vector2 collisionPosition = boxIntersection.Value;
                 float extraY = 0f;
+                float extraX = 0f;
                 //check whether ball hits from top OR bottom
                 if (topLeftBound.X < collisionPosition.X && collisionPosition.X < bottomRightBound.X)
                 {
+                    //bounce
                     velocity.Y = -velocity.Y;
-                    hitSound.Play();
+
+                    //check for collision near edge of player
+                    float distanceToMiddle = (player.OriginAdjustedPosition.X + player.Width / 2 - collisionPosition.X);
+                    if (Math.Abs(distanceToMiddle) > player.Width / 4)
+                    {
+                        //calculate extra X velocity that still needs adjustment for currentspeed      
+                        extraX = -Math.Sign(distanceToMiddle) * playerAngleScaler;
+
+                        edgeHitSound.Play();
+                    }
+                    else
+                        hitSound.Play();
                 }
                 else
                 {
@@ -150,7 +266,7 @@ namespace pong
 
                     //check for collision near edge of player
                     float distanceToMiddle = (player.OriginAdjustedPosition.Y + player.Height / 2 - collisionPosition.Y);
-                    if (Math.Abs(distanceToMiddle) > player.Height / 2 - player.Height / 4)
+                    if (Math.Abs(distanceToMiddle) > player.Height / 4)
                     {
                         //calculate extra y velocity that still needs adjustment for currentspeed      
                         extraY = -Math.Sign(distanceToMiddle) * playerAngleScaler;
@@ -171,7 +287,7 @@ namespace pong
 
                 //add the extra y velocity and add the lost distance in the right direction
                 float currentSpeed = velocity.Length();
-
+                velocity.X += extraX * currentSpeed;
                 velocity.Y += extraY * currentSpeed;
                 velocity.Normalize();
                 position += velocity * lostDistance;
@@ -185,16 +301,26 @@ namespace pong
             renderBall = false;
             RandomDirection();
         }
+        public void ReCalculateStartPosition()
+        {
+            startPosition = Pong.screenSize / 2;
+        }
         void RandomDirection()
         {
             //calculate random direction that excludes directions that are close to exclusively vertical
             int x;
             int y = Pong.Random.Next(-10, 10);
 
-            if (Pong.Random.Next(2) == 0)
-                x = Pong.Random.Next(-10, -5);
+            int minimumX;
+            if (pong.IsFourPlayers)
+                minimumX = 0;
             else
-                x = Pong.Random.Next(5, 10);
+                minimumX = 5;
+
+            if (Pong.Random.Next(2) == 0)
+                x = Pong.Random.Next(-10, -minimumX);
+            else
+                x = Pong.Random.Next(minimumX, 10);
 
             //assign random direction to velocity
             velocity = new Vector2(x, y);

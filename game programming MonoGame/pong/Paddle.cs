@@ -8,73 +8,146 @@ using Microsoft.Xna.Framework.Input;
 
 namespace pong
 {
-     class Player : GameObject
+    internal class Player : GameObject
     {
         //Class variables.
-        Pong pong;
-        Texture2D hearthTex;
+        Texture2D redHeartTex, blueHeartTex, greenHeartTex, pinkHeartTex;
+        Vector2 heartOrigin;
         SoundEffect damageSound;
         Keys keyup, keydown;
         KeyboardState keyboard;
+        bool isVertical;
+        bool isAlive;
         int playerId;
         int maxHealth = 3;
         int health;
         int speed = 6;
-        
 
-        public Player(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, ContentManager _content, Pong _pong) : base(_content, _paddleTex, _startPosition)
+
+        public Player(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_content, _paddleTex, _startPosition, _pong)
         {
             //Constructing variables.        
-            pong = _pong;
             keyup = _keyUp;
             keydown = _keyDown;
             playerId = _playerId;
+            isVertical = _isVertical;
+            isAlive = true;
             health = maxHealth;
-            hearthTex = _content.Load<Texture2D>("hartje");
+            redHeartTex = _content.Load<Texture2D>("hartje");
+            blueHeartTex = _content.Load<Texture2D>("blueHeart");
+            greenHeartTex = _content.Load<Texture2D>("greenHeart");
+            pinkHeartTex = _content.Load<Texture2D>("pinkHeart");
             damageSound = _content.Load<SoundEffect>("damageSound");
+            heartOrigin = new Vector2 (redHeartTex.Width, redHeartTex.Height) / 2;
 
             //offsets the start position to make up for origin offset
-            if (playerId == 0)
-                startPosition.X += origin.X;
-            else
-                startPosition.X -= origin.X;
+            switch(playerId)
+            {
+                case 0:
+                    startPosition.X += origin.X;
+                    break;
+                case 1:
+                    startPosition.X -= origin.X;
+                    break;
+                case 2:
+                    startPosition.Y += origin.Y;
+                    break;
+                case 3: 
+                    startPosition.Y -= origin.Y;
+                    break;
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            base.Draw(spriteBatch);
+            if (isAlive)
+            {
+                base.Draw(spriteBatch);
 
-            //drawing the health at the right position based on which player the health belongs to
-            if (playerId == 0)
-            {
-                for (int i = 0; i < health; i++)
+                if (!pong.IsFourPlayers)
                 {
-                    spriteBatch.Draw(hearthTex, new Vector2(20 + i * 2f * hearthTex.Width, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
+                    //drawing the health at the right position based on which player the health belongs to
+                    if (playerId == 0)
+                    {
+                        for (int i = 0; i < health; i++)
+                        {
+                            spriteBatch.Draw(redHeartTex, new Vector2(20 + i * 2f * heartOrigin.X * 2, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < health; i++)
+                        {
+                            spriteBatch.Draw(redHeartTex, new Vector2(Pong.screenSize.X - (i + 1) * 2f * heartOrigin.X * 2 - 20, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
+                        }
+                    }
+                }
+                else
+                {
+                    switch(playerId)
+                    {
+                        case 0:
+                            for (int i = 0; i < health; i++)
+                            {
+                                spriteBatch.Draw(redHeartTex, new Vector2(Pong.screenSize.X / 2 - heartOrigin.X * 12.5f + i * 4 * heartOrigin.X, Pong.screenSize.Y / 2 - heartOrigin.Y * 2.5f), null, Color.White * 0.3f, 0f, heartOrigin, 2f, SpriteEffects.None, 0);
+                            }
+                            break;
+                        case 1:
+                            for (int i = 0; i < health; i++)
+                            {
+                                spriteBatch.Draw(blueHeartTex, new Vector2(Pong.screenSize.X / 2 + heartOrigin.X * 0.5f + i * 4 * heartOrigin.X, Pong.screenSize.Y / 2 + heartOrigin.Y * 2.5f), null, Color.White * 0.3f, 0f, heartOrigin, 2f, SpriteEffects.None, 0);
+                            }
+                            break;
+                        case 2:
+                            for (int i = 0; i < health; i++)
+                            {
+                                spriteBatch.Draw(greenHeartTex, new Vector2(Pong.screenSize.X / 2 + heartOrigin.X * 0.5f + i * 4 * heartOrigin.X, Pong.screenSize.Y / 2 - heartOrigin.Y * 2.5f), null, Color.White * 0.3f, 0f, heartOrigin, 2f, SpriteEffects.None, 0);
+                            }
+                            break;
+                        case 3:
+                            for (int i = 0; i < health; i++)
+                            {
+                                spriteBatch.Draw(pinkHeartTex, new Vector2(Pong.screenSize.X / 2 - heartOrigin.X * 12.5f + i * 4 * heartOrigin.X, Pong.screenSize.Y / 2 + heartOrigin.Y * 2.5f), null, Color.White * 0.3f, 0f, heartOrigin, 2f, SpriteEffects.None, 0);
+                            }
+                            break;
+                    }
                 }
             }
-            else
-            {
-                for (int i = 0; i < health; i++)
-                {
-                    spriteBatch.Draw(hearthTex, new Vector2(Pong.screenSize.X - (i + 1) * 2f * hearthTex.Width - 20, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
-                }
-            }
-        }        
+        }
         public override void Update(GameTime gameTime)
         {
-            HandleInput();
-            base.Update(gameTime);
+            if (isAlive)
+            {
+                HandleInput();
+                base.Update(gameTime);
 
-            // Resolving collision with the screen.
-            if (position.Y < origin.Y)
-            {
-                position.Y = origin.Y;
-                velocity.Y = 0f;
-            }
-            if (position.Y > Pong.screenSize.Y - origin.Y)
-            {
-                position.Y = Pong.screenSize.Y - origin.Y;
-                velocity.Y = 0f;
+                // Resolving collision with the screen.
+                if (isVertical)
+                {
+                    if (position.Y < origin.Y + origin.X)
+                    {
+                        position.Y = origin.Y + origin.X;
+                        velocity.Y = 0f;
+                    }
+                    if (position.Y > Pong.screenSize.Y - origin.Y - origin.X)
+                    {
+                        position.Y = Pong.screenSize.Y - origin.Y - origin.X;
+                        velocity.Y = 0f;
+                    }
+                }
+                else
+                {
+                    if (position.X < origin.X + origin.Y)
+                    {
+                        position.X = origin.X + origin.Y;
+                        velocity.X = 0f;
+                    }
+                    if (position.X > Pong.screenSize.X - origin.X - origin.Y)
+                    {
+                        position.X = Pong.screenSize.X - origin.X - origin.Y;
+                        velocity.X = 0f;
+                    }
+                }
             }
         }
 
@@ -84,16 +157,20 @@ namespace pong
             keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(keyup) && !keyboard.IsKeyDown(keydown))
             {
-                velocity.Y = -360f;
+                if (isVertical)
+                    velocity.Y = -360f;
+                else
+                    velocity.X = 360f;
             }
             else if (keyboard.IsKeyDown(keydown) && !keyboard.IsKeyDown(keyup))
             {
-                velocity.Y = 360f;
+                if (isVertical)
+                    velocity.Y = 360f;
+                else
+                    velocity.X = -360f;
             }
             else
-                velocity.Y = 0;
-           
-
+                velocity = Vector2.Zero;
         }
         public void TakeDamage(int damage)
         {
@@ -102,15 +179,50 @@ namespace pong
 
             if (health <= 0)
             {
-                pong.GameOver(playerId);
+                isAlive = false;
+                //game over call only results in the game being over if only one player is alive
+                pong.GameOver();
             }
         }
         public void GameReset()
         {
+            isAlive = true;
             health = maxHealth;
             position = startPosition;
         }
+        public void ReCalculateStartPosition()
+        {
+            switch (playerId)
+            {
+                case 0:
+                    startPosition = new Vector2(origin.X, Pong.screenSize.Y / 2);
+                    break;
+                case 1:
+                    startPosition = new Vector2(Pong.screenSize.X - origin.X, Pong.screenSize.Y / 2);
+                    break;
+                case 2:
+                    startPosition = new Vector2(Pong.screenSize.X / 2, origin.Y);
+                    break;
+                case 3:
+                    startPosition = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y - origin.Y);
+                    break;
+            }
 
+        }
+
+        public bool IsAlive
+        {
+            get { return isAlive; }
+            set { isAlive = value; }
+        }
+        public bool IsVertical
+        {
+            get { return isVertical; }
+        }
+        public int PlayerId
+        {
+            get { return playerId; }
+        }
         public int Width
         {
             get { return texture.Width; }
