@@ -68,10 +68,12 @@ namespace pong
             if (position.Y < origin.Y)
             {
                 position.Y = origin.Y;
+                velocity.Y = 0f;
             }
             if (position.Y > Pong.screenSize.Y - origin.Y)
             {
                 position.Y = Pong.screenSize.Y - origin.Y;
+                velocity.Y = 0f;
             }
         }
 
@@ -116,9 +118,17 @@ namespace pong
         {
             get { return texture.Height; }
         }
-        public Vector2 CollisionPosition
+        public Vector2 OriginAdjustedPosition
         {
             get { return position - origin; }
+        }
+        public Vector2 OriginAdjustedLastPosition
+        {
+            get { return lastPosition - origin; }
+        }
+        public Vector2 Velocity
+        {
+            get { return velocity; }
         }
     }
 }

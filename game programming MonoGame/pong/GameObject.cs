@@ -7,7 +7,7 @@ namespace pong
     class GameObject
     {
         protected Texture2D texture;
-        protected Vector2 position, startPosition, velocity, origin;
+        protected Vector2 position, lastPosition, startPosition, velocity, origin;
         protected GameObject(ContentManager _content, string _textureString, Vector2 _startPosition)
         {
             velocity = Vector2.Zero;
@@ -19,6 +19,7 @@ namespace pong
 
         public virtual void Update(GameTime gameTime)
         {
+            lastPosition = position;
             position += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
