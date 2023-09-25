@@ -13,7 +13,7 @@ namespace pong
         Player player1, player2;
 
         //variables for adjusting the feel of the game
-        float speedMultiplier, startSpeed, paddleAngleScaler;
+        float speedMultiplier, startSpeed, playerAngleScaler;
 
         //variables for flickering
         float lastFlicker, flickerTime;
@@ -29,7 +29,7 @@ namespace pong
             player2 = _player2;
             speedMultiplier = 1.03f;
             startSpeed = 320f;
-            paddleAngleScaler = 0.5f;
+            playerAngleScaler = 0.5f;
             flickerTime = 0.33f;
         }
 
@@ -109,26 +109,26 @@ namespace pong
 
         void CheckPaddle(Player player)
         {
-            //create the idea of a bounding box that is slightly larger than the actual bounding box of the padle to accomodate for the ball colliding at the centre only
+            //create a bounding box that is slightly larger than the actual bounding box of the player to accomodate for the ball colliding at the centre only
             Vector2 topLeftBound = new Vector2(player.OriginAdjustedPosition.X - origin.X, player.OriginAdjustedPosition.Y - origin.Y);
             Vector2 bottomRightBound = new Vector2(player.OriginAdjustedPosition.X + origin.X + player.Width, player.OriginAdjustedPosition.Y + origin.Y + player.Height);
             Vector2 topLeftLastBound = new Vector2(player.OriginAdjustedLastPosition.X - origin.X, player.OriginAdjustedLastPosition.Y - origin.Y);
             Vector2 bottomRightLastBound = new Vector2(player.OriginAdjustedLastPosition.X + origin.X + player.Width, player.OriginAdjustedLastPosition.Y + origin.Y + player.Height);
 
-            //check if the paddle has moved through the ball between frames and if so move the ball by the same amount the paddle moved. This is to prevent the ball from getting stuck inside the paddle
-            //note: the bouncing isn't calculated here, even though its likely that it should. The reasons are that the exact collision position remains unknown and that the paddle might move in the same vertical direction as the ball
+            //check if the player has moved through the ball between frames and if so move the ball by the same amount the player moved. This is to prevent the ball from getting stuck inside the player
+            //note: the bouncing isn't calculated here, even though its likely that it should. The reasons are that the exact collision position remains unknown and that the player might move in the same vertical direction as the ball
             if ((position.X > topLeftBound.X || lastPosition.X > topLeftBound.X) && (position.X < bottomRightBound.X || lastPosition.X < bottomRightBound.X))
             {
-                Vector2? paddleIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftBound + new Vector2(origin.X, 0f), topLeftBound - topLeftLastBound, position.Y, null, null);
-                Vector2? paddleIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightBound - new Vector2(origin.X, 0f), bottomRightBound - bottomRightLastBound, position.Y, null, null);
-                if (paddleIntersectionBottom.HasValue || paddleIntersectionTop.HasValue)
+                Vector2? playerIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftBound + new Vector2(origin.X, 0f), topLeftBound - topLeftLastBound, position.Y, null, null);
+                Vector2? playerIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightBound - new Vector2(origin.X, 0f), bottomRightBound - bottomRightLastBound, position.Y, null, null);
+                if (playerIntersectionBottom.HasValue || playerIntersectionTop.HasValue)
                 {
                     lastPosition += (bottomRightBound - bottomRightLastBound);
                     position += (bottomRightBound - bottomRightLastBound);
                 }
             }
 
-            //check for collision with paddle
+            //check for collision with player
             Vector2? boxIntersection = CollisionHelper.BoxIntersection(lastPosition, position - lastPosition, topLeftBound, bottomRightBound);
             if (boxIntersection.HasValue)
             {
@@ -150,7 +150,7 @@ namespace pong
                     if (Math.Abs(distanceToMiddle) > player.Height / 2 - player.Height / 4)
                     {
                         //calculate extra y velocity that still needs adjustment for currentspeed      
-                        extraY = -Math.Sign(distanceToMiddle) * paddleAngleScaler;
+                        extraY = -Math.Sign(distanceToMiddle) * playerAngleScaler;
 
                         edgeHitSound.Play();
                     }
@@ -175,7 +175,7 @@ namespace pong
                 velocity *= currentSpeed;
             }
         }
-       public override void Reset()
+        public override void Reset()
         {
             base.Reset();
             flicker = true;
