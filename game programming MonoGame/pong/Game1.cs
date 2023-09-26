@@ -1,4 +1,5 @@
 ﻿using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -24,8 +25,10 @@ namespace pong
         Player player1, player2;
         Emotes emotes;
 
-        string dynamicGameOverText, gameOverText, welcomeText;
-        Vector2 dynamicGameOverTextOrigin, gameOverTextOrigin, welcomeTextOrigin;
+        MainMenu mainMenu;
+
+        string dynamicGameOverText, gameOverText;
+        Vector2 dynamicGameOverTextOrigin, gameOverTextOrigin;
 
         Color gameOverColor;
 
@@ -54,13 +57,13 @@ namespace pong
             standardFont = Content.Load<SpriteFont>("standardFont");
 
             gameOverText = "Press <Space> to play again, or press <Escape> to return to welcome screen";
-            welcomeText = "Welcome to Pong, press <Space> to start";
             gameOverTextOrigin = standardFont.MeasureString(gameOverText) / 2;
-            welcomeTextOrigin = standardFont.MeasureString(welcomeText) / 2;
 
             //Constructing players.
             player1Tex = Content.Load<Texture2D>("rodeSpeler");
             player2Tex = Content.Load<Texture2D>("blauweSpeler");
+
+            mainMenu = new MainMenu(standardFont, Content);
 
             player1 = new Player(new Vector2(0, screenSize.Y / 2 - player1Tex.Height / 2), player1Tex, Keys.W, Keys.S, 1, Content, this);
             player2 = new Player(new Vector2(screenSize.X - player2Tex.Width, screenSize.Y / 2 - player2Tex.Height / 2), player2Tex, Keys.Up, Keys.Down, 2, Content, this);
@@ -77,8 +80,11 @@ namespace pong
 
             if (gameState == GameState.MainMenu)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                mainMenu.Update();
+                if (mainMenu.startSignal)
                     gameState = GameState.Playing;
+                if (mainMenu.exitSignal)
+                    Exit();
             }
 
             if (gameState == GameState.GameOver)
@@ -114,7 +120,7 @@ namespace pong
 
             if (gameState == GameState.MainMenu)
             {
-                spriteBatch.DrawString(standardFont, welcomeText, CenterOfScreen - welcomeTextOrigin, Color.White);
+                mainMenu.Draw(spriteBatch);
             }
             if (gameState == GameState.Playing)
             {
