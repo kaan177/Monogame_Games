@@ -37,11 +37,13 @@ namespace pong
             mouse = Mouse.GetState();
             if (rectangle.Contains(mouse.Position))
             {
-                
+                buttonColor = Color.Blue;
                 if (mouse.LeftButton == ButtonState.Pressed && previousMouse.LeftButton != ButtonState.Pressed)
                     isPressed = !isPressed;
 
             }
+            else
+                buttonColor = Color.Green;
         }
         public void Draw(SpriteBatch _spriteBatch)
         {

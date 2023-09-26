@@ -16,7 +16,7 @@ namespace pong
         string gameName = "Pong";
         Vector2 gameNamePosition;
 
-        Button player4Mode, powerUps, bot, start, exit;
+        public Button player4Mode, powerUps, bot, start, exit;
 
         Vector2 buttonSize, exitSize;
         Vector2 player4ModePos, powerUpsPos, botPos, startPos, exitPos;
@@ -71,11 +71,8 @@ namespace pong
             start.Update();
             exit.Update();
 
-            if (exit.isPressed)
-                exitSignal = true;
-
-            if (start.isPressed)
-                startSignal = true;
+            exitSignal = exit.isPressed;
+            startSignal = start.isPressed;
             
         }
 

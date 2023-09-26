@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
@@ -76,10 +77,14 @@ namespace pong
             lastGameState = gameState;
 
             if (gameState == GameState.MainMenu)
-            {
+            {   
                 mainMenu.Update();
+                Debug.WriteLine(mainMenu.startSignal.ToString());
                 if (mainMenu.startSignal)
+                {
                     gameState = GameState.Playing;
+                    mainMenu.start.isPressed = false;
+                }
                 if (mainMenu.exitSignal)
                     Exit();
             }
