@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using System;
+using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,7 +19,6 @@ namespace pong
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Texture2D player1Tex, player2Tex;
         SpriteFont standardFont;
 
         Ball ball;
@@ -32,7 +32,6 @@ namespace pong
 
         Color gameOverColor;
 
-
         static void Main()
         {
             Pong game = new Pong();
@@ -43,7 +42,7 @@ namespace pong
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            Random = new Random();
         }
 
         protected override void LoadContent()
@@ -60,14 +59,12 @@ namespace pong
             gameOverTextOrigin = standardFont.MeasureString(gameOverText) / 2;
 
             //Constructing players.
-            player1Tex = Content.Load<Texture2D>("rodeSpeler");
-            player2Tex = Content.Load<Texture2D>("blauweSpeler");
 
+            player1 = new Player(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.W, Keys.S, 0, Content, this);
+            player2 = new Player(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.Up, Keys.Down, 1, Content, this);
             mainMenu = new MainMenu(standardFont, Content);
 
-            player1 = new Player(new Vector2(0, screenSize.Y / 2 - player1Tex.Height / 2), player1Tex, Keys.W, Keys.S, 1, Content, this);
-            player2 = new Player(new Vector2(screenSize.X - player2Tex.Width, screenSize.Y / 2 - player2Tex.Height / 2), player2Tex, Keys.Up, Keys.Down, 2, Content, this);
-
+            
             //Constructing the ball.
             ball = new Ball(screenSize / 2, Content, player1, player2);
 
@@ -107,8 +104,8 @@ namespace pong
                 }
 
                 ball.Update(gameTime);
-                player1.Update();
-                player2.Update();
+                player1.Update(gameTime);
+                player2.Update(gameTime);
                 emotes.HandleInput(gameTime);
             }
         }
@@ -155,6 +152,10 @@ namespace pong
             }
             gameState = GameState.GameOver;
             dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
+        }
+        public static Random Random
+        {
+            get; private set;
         }
     }
 }

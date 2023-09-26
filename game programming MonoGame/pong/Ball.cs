@@ -3,185 +3,219 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
-using System.Data;
 
 namespace pong
 {
-    class Ball
+    class Ball : GameObject
     {
-        Texture2D ball;
         SoundEffect hitSound, edgeHitSound, borderHitSound;
 
-        Vector2 position, startPosition, velocity, origin;
-        float speedMultiplier, startSpeed, paddleAngleScaler;
-        float lastBounce, lastFlicker, flickerTime;
+        Player player1, player2;
 
-        int collisionPrecision = 1;
+        //variables for adjusting the feel of the game
+        float speedMultiplier, startSpeed, playerAngleScaler;
+
+        //variables for flickering
+        float lastFlicker, flickerTime;
         int totalFlickers;
-
         bool flicker, renderBall;
 
-        Player paddle1, paddle2;
-        System.Random random;
+        public Ball(Vector2 _startPosition, ContentManager _content, Player _player1, Player _player2) : base(_content, "ball", _startPosition)
+        {
+            hitSound = _content.Load<SoundEffect>("paddleHitSound");
+            edgeHitSound = _content.Load<SoundEffect>("edgeHitSound");
+            borderHitSound = _content.Load<SoundEffect>("borderHitSound");
+            player1 = _player1;
+            player2 = _player2;
+            speedMultiplier = 1.03f;
+            startSpeed = 320f;
+            playerAngleScaler = 0.5f;
+            flickerTime = 0.33f;
+        }
 
-        public void Update(GameTime _gameTime)
+        public override void Update(GameTime gameTime)
         {
             if (flicker == true)
             {
-                if(_gameTime.TotalGameTime.TotalSeconds > lastFlicker)
-                {
-                    lastFlicker = (float)_gameTime.TotalGameTime.TotalSeconds + flickerTime;
-                    renderBall = !renderBall;
-                    totalFlickers++;
-                    if(totalFlickers > 6)
-                    {
-                        flicker = false;
-                        totalFlickers = 0;
-                    }
-                }
+                Flicker(gameTime);
             }
             else
             {
-                for (int i = 0; i < collisionPrecision; i++)
-                {
-                    position += velocity / collisionPrecision;
-                    CheckCollision(_gameTime);
-                }
+                base.Update(gameTime);
+                CheckCollision(gameTime);
             }
         }
 
-        public void Draw(SpriteBatch _spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch) 
         {
-            if(renderBall)
-                _spriteBatch.Draw(ball, position - origin, Microsoft.Xna.Framework.Color.White);
+            if (renderBall)
+                base.Draw(spriteBatch);
         }
         void CheckCollision(GameTime _gameTime)
         {
+            CheckPaddle(player1);
+            CheckPaddle(player2);
             CheckVerticalBorders();
             CheckHorizontalBorders();
-            //check if bounce hasn't very recently occured to avoid bouncing back and forth when the ball ends up within the paddle due to the movement being in steps
-            if (_gameTime.TotalGameTime.TotalMilliseconds > lastBounce)
-            {
-                //Check for collisions with paddles
-                if(CheckPaddle(paddle1) || CheckPaddle (paddle2))
-                    lastBounce = (float)_gameTime.TotalGameTime.TotalMilliseconds + 100f;
-            } 
         }
 
         void CheckVerticalBorders()
         {
-            if (position.X + origin.X <= 0)
+            if (position.X <= -origin.X)
             {
                 Reset();
-                paddle1.Reset();
-                paddle2.Reset();
+                player1.Reset();
+                player2.Reset();
 
-                paddle1.TakeDamage(1);
+                player1.TakeDamage(1);
             }
-            if (position.X - origin.X >= Pong.screenSize.X)
+            if (position.X >= Pong.screenSize.X + origin.X)
             {
                 Reset();
-                paddle1.Reset();
-                paddle2.Reset();
+                player1.Reset();
+                player2.Reset();
 
-                paddle2.TakeDamage(1);
+                player2.TakeDamage(1);
             }
         }
 
         void CheckHorizontalBorders()
         {
-            if (position.Y < 0 + origin.Y || position.Y > Pong.screenSize.Y - origin.Y)
+            //create variables for checking whether the ball bounces with the side while calculating the correct collision position
+            Vector2 directionVector = position - lastPosition;
+            Vector2? intersectionTop = CollisionHelper.HorizontalIntersection(lastPosition, directionVector, origin.Y, null, null);
+            Vector2? intersectionBottom = CollisionHelper.HorizontalIntersection(lastPosition, directionVector, Pong.screenSize.Y - origin.Y, null, null);
+
+            //Check whether a collision should occur
+            if (intersectionTop.HasValue || intersectionBottom.HasValue)
             {
+                Vector2 collisionPosition;
+                if(intersectionTop.HasValue)
+                    collisionPosition = intersectionTop.Value;
+                else
+                    collisionPosition = intersectionBottom.Value;
+
+                //bounce 
                 velocity.Y = -velocity.Y;
                 borderHitSound.Play();
+
+                //code for making up for lost distance from phasing through the border(noticable at high speeds)
+                Vector2 lostDistance = position - collisionPosition;
+                position = collisionPosition;
+                lastPosition = position;
+                position += new Vector2(lostDistance.X, -lostDistance.Y);            
             }
         }
 
-        bool CheckPaddle(Player paddle)
+        void CheckPaddle(Player player)
         {
-            //check for collision with paddle
-            if (position.X + origin.X >= paddle.Position.X && position.X - origin.X <= paddle.Position.X + paddle.Width && position.Y + origin.Y >= paddle.Position.Y && position.Y - origin.Y <= paddle.Position.Y + paddle.Height)
+            //create a bounding box that is slightly larger than the actual bounding box of the player to accomodate for the ball colliding at the centre only
+            Vector2 topLeftBound = new Vector2(player.OriginAdjustedPosition.X - origin.X, player.OriginAdjustedPosition.Y - origin.Y);
+            Vector2 bottomRightBound = new Vector2(player.OriginAdjustedPosition.X + origin.X + player.Width, player.OriginAdjustedPosition.Y + origin.Y + player.Height);
+            Vector2 topLeftLastBound = new Vector2(player.OriginAdjustedLastPosition.X - origin.X, player.OriginAdjustedLastPosition.Y - origin.Y);
+            Vector2 bottomRightLastBound = new Vector2(player.OriginAdjustedLastPosition.X + origin.X + player.Width, player.OriginAdjustedLastPosition.Y + origin.Y + player.Height);
+
+            //check if the player has moved through the ball between frames and if so move the ball by the same amount the player moved. This is to prevent the ball from getting stuck inside the player. Also check for the last position of the ball to catch edge cases
+            //note: the bouncing isn't calculated here, even though its likely that it should. The reasons are that the exact collision position remains unknown and that the player might move in the same vertical direction as the ball
+            if ((position.X > topLeftBound.X || lastPosition.X > topLeftBound.X) && (position.X < bottomRightBound.X || lastPosition.X < bottomRightBound.X))
             {
+                Vector2? playerBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, position.Y, null, null);
+                Vector2? playerLastBallIntersectionTop = CollisionHelper.HorizontalIntersection(topLeftLastBound, topLeftBound - topLeftLastBound, lastPosition.Y, null, null);
+                Vector2? playerBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, position.Y, null, null);
+                Vector2? playerLastBallIntersectionBottom = CollisionHelper.HorizontalIntersection(bottomRightLastBound, bottomRightBound - bottomRightLastBound, lastPosition.Y, null, null);
+
+                if (playerBallIntersectionBottom.HasValue || playerBallIntersectionTop.HasValue || playerLastBallIntersectionBottom.HasValue || playerLastBallIntersectionTop.HasValue)
+                {
+                    lastPosition += (bottomRightBound - bottomRightLastBound);
+                    position += (bottomRightBound - bottomRightLastBound);
+                }
+            }
+
+            //check for collision with player
+            Vector2? boxIntersection = CollisionHelper.BoxIntersection(lastPosition, position - lastPosition, topLeftBound, bottomRightBound);
+            if (boxIntersection.HasValue)
+            {
+                Vector2 collisionPosition = boxIntersection.Value;
+                float extraY = 0f;
                 //check whether ball hits from top OR bottom
-                if (position.X > paddle.Position.X && position.X < paddle.Position.X + paddle.Width)
+                if (topLeftBound.X < collisionPosition.X && collisionPosition.X < bottomRightBound.X)
                 {
                     velocity.Y = -velocity.Y;
-                    velocity *= speedMultiplier;
                     hitSound.Play();
                 }
                 else
                 {
-                    //check if not colliding with backside of the paddle
-                    if (velocity.X < 0 && position.X < paddle.Position.X + paddle.Width / 2)
-                        return false;
-                    else if (velocity.X > 0 && position.X > paddle.Position.X + paddle.Width / 2)
-                        return false;
-
                     //bounce
                     velocity.X = -velocity.X;
 
-                    //check for collision near edge of paddle
-                    float distanceToMiddle = (paddle.Position.Y + paddle.Height / 2 - position.Y);
-
-                    if (Math.Abs(distanceToMiddle) > paddle.Height / 2 - paddle.Height / 4)
+                    //check for collision near edge of player
+                    float distanceToMiddle = (player.OriginAdjustedPosition.Y + player.Height / 2 - collisionPosition.Y);
+                    if (Math.Abs(distanceToMiddle) > player.Height / 2 - player.Height / 4)
                     {
-                        //mainpulate velocity to end up with altered angle
-                        float currentSpeed = velocity.Length();
-                        velocity.Y -= Math.Sign(distanceToMiddle) * paddleAngleScaler * currentSpeed;
-                        velocity.Normalize();
-                        velocity *= currentSpeed;
+                        //calculate extra y velocity that still needs adjustment for currentspeed      
+                        extraY = -Math.Sign(distanceToMiddle) * playerAngleScaler;
 
                         edgeHitSound.Play();
                     }
                     else
                         hitSound.Play();
-
-                    velocity *= speedMultiplier;
                 }
-                return true;
-            }
-            return false;
-        }
+                velocity *= speedMultiplier;
 
-        public void Reset()
+                //calculate the distance that needs to be added to the position to make up for the lost distance from setting the position to the collision position
+                float lostDistance = (position - collisionPosition).Length();
+
+                //set position and lastposition to the place the ball is supposed to be
+                position = collisionPosition;
+                lastPosition = position;
+
+                //add the extra y velocity and add the lost distance in the right direction
+                float currentSpeed = velocity.Length();
+
+                velocity.Y += extraY * currentSpeed;
+                velocity.Normalize();
+                position += velocity * lostDistance;
+                velocity *= currentSpeed;
+            }
+        }
+        public override void Reset()
         {
-            position = startPosition;
+            base.Reset();
             flicker = true;
             renderBall = false;
-
+            RandomDirection();
+        }
+        void RandomDirection()
+        {
+            //calculate random direction that excludes directions that are close to exclusively vertical
             int x;
-            int y = random.Next(-10, 10);
+            int y = Pong.Random.Next(-10, 10);
 
-            if (random.Next(2) == 0)
-                x = random.Next(-10, -5);
+            if (Pong.Random.Next(2) == 0)
+                x = Pong.Random.Next(-10, -5);
             else
-                x = random.Next(5, 10);
+                x = Pong.Random.Next(5, 10);
 
+            //assign random direction to velocity
             velocity = new Vector2(x, y);
             velocity.Normalize();
             velocity *= startSpeed;
         }
-
-        public Ball(Vector2 _startPosition, ContentManager _Content, Player _paddle1, Player _paddle2)
+        void Flicker(GameTime gameTime)
         {
-            ball = _Content.Load<Texture2D>("ball");
-            hitSound = _Content.Load<SoundEffect>("paddleHitSound");
-            edgeHitSound = _Content.Load<SoundEffect>("edgeHitSound");
-            borderHitSound = _Content.Load<SoundEffect>("borderHitSound");
-            origin = new Vector2(ball.Width, ball.Height) / 2;
-            startPosition = _startPosition;
-            speedMultiplier = 1.05f;
-            startSpeed = 7f;
-            paddleAngleScaler = 0.5f;
-            paddle1 = _paddle1;
-            paddle2 = _paddle2;
-            random = new System.Random();
-            collisionPrecision = 10;
-            flickerTime = 0.33f;
-            Reset();
+            if (gameTime.TotalGameTime.TotalSeconds > lastFlicker)
+            {
+                lastFlicker = (float)gameTime.TotalGameTime.TotalSeconds + flickerTime;
+                renderBall = !renderBall;
+                totalFlickers++;
+                if (totalFlickers > 6)
+                {
+                    flicker = false;
+                    totalFlickers = 0;
+                }
+            }
         }
-
-
+       
     }
 }
 

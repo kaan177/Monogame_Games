@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,87 +8,93 @@ using Microsoft.Xna.Framework.Input;
 
 namespace pong
 {
-     class Player
+     class Player : GameObject
     {
         //Class variables.
         Pong pong;
-        Vector2 position, startPosition;
-        Texture2D paddleTex, hearthTex;
+        Texture2D hearthTex;
+        SoundEffect damageSound;
         Keys keyup, keydown;
         KeyboardState keyboard;
         int playerId;
         int maxHealth = 3;
         int health;
         int speed = 6;
-        SoundEffect damageSound;
-
-
         
-        public Player(Vector2 _startPosition, Texture2D _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, ContentManager _content, Pong _pong)
+
+        public Player(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, ContentManager _content, Pong _pong) : base(_content, _paddleTex, _startPosition)
         {
             //Constructing variables.        
             pong = _pong;
-            startPosition = _startPosition;
-            position = startPosition;
-            paddleTex = _paddleTex;
             keyup = _keyUp;
             keydown = _keyDown;
             playerId = _playerId;
             health = maxHealth;
             hearthTex = _content.Load<Texture2D>("hartje");
             damageSound = _content.Load<SoundEffect>("damageSound");
+
+            //offsets the start position to make up for origin offset
+            if (playerId == 0)
+                startPosition.X += origin.X;
+            else
+                startPosition.X -= origin.X;
         }
-        public void Update()
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+
+            //drawing the health at the right position based on which player the health belongs to
+            if (playerId == 0)
+            {
+                for (int i = 0; i < health; i++)
+                {
+                    spriteBatch.Draw(hearthTex, new Vector2(20 + i * 2f * hearthTex.Width, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < health; i++)
+                {
+                    spriteBatch.Draw(hearthTex, new Vector2(Pong.screenSize.X - (i + 1) * 2f * hearthTex.Width - 20, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
+                }
+            }
+        }        
+        public override void Update(GameTime gameTime)
         {
             HandleInput();
-        }
-        public void Draw(SpriteBatch _spriteBatch)
-        {
-            //Drawing the sprite.
-            _spriteBatch.Draw(paddleTex, position, Color.White);
-            if (playerId == 1)
-            {
-                for (int i = 0; i < health; i++)
-                {
-                    _spriteBatch.Draw(hearthTex, new Vector2(20 + i * 2f * hearthTex.Width, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
-                }
-            }
-            if (playerId == 2)
-            {
-                for (int i = 0; i < health; i++)
-                {
-                    _spriteBatch.Draw(hearthTex, new Vector2(Pong.screenSize.X - (i + 1) * 2f * hearthTex.Width - 20, 20), null, Color.White * 0.5f, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0);
-                }
-            }
-        }
-        
-        private void HandleInput()
-        {
-            // Taking player input and moving the paddles.
-            keyboard = Keyboard.GetState();
-            Keys[] key = keyboard.GetPressedKeys();
+            base.Update(gameTime);
 
-            if (keyboard.IsKeyDown(keyup))
-            {
-                position.Y -= speed;
-            }
-
-            if (keyboard.IsKeyDown(keydown))
-            {
-                position.Y += speed;
-            }
             // Resolving collision with the screen.
-            if (position.Y < 0)
+            if (position.Y < origin.Y)
             {
-                position.Y = 0;
+                position.Y = origin.Y;
+                velocity.Y = 0f;
             }
-
-            if (position.Y > Pong.screenSize.Y - paddleTex.Height)
+            if (position.Y > Pong.screenSize.Y - origin.Y)
             {
-                position.Y = Pong.screenSize.Y - paddleTex.Height;
+                position.Y = Pong.screenSize.Y - origin.Y;
+                velocity.Y = 0f;
             }
         }
 
+        void HandleInput()
+        {
+            // Taking player input and setting velocity accordingly.
+            keyboard = Keyboard.GetState();
+            if (keyboard.IsKeyDown(keyup) && !keyboard.IsKeyDown(keydown))
+            {
+                velocity.Y = -360f;
+            }
+            else if (keyboard.IsKeyDown(keydown) && !keyboard.IsKeyDown(keyup))
+            {
+                velocity.Y = 360f;
+            }
+            else
+                velocity.Y = 0;
+           
+
+        }
         public void TakeDamage(int damage)
         {
             health -= damage;
@@ -97,29 +105,31 @@ namespace pong
                 pong.GameOver(playerId);
             }
         }
-
         public void GameReset()
         {
             health = maxHealth;
             position = startPosition;
         }
 
-        public void Reset()
-        {
-            position = startPosition;
-        }
-
-        public int Height
-        {
-            get { return paddleTex.Height; }
-        }
         public int Width
         {
-            get { return paddleTex.Width; }
+            get { return texture.Width; }
         }
-        public Vector2 Position
+        public int Height
         {
-            get { return position; }
+            get { return texture.Height; }
+        }
+        public Vector2 OriginAdjustedPosition
+        {
+            get { return position - origin; }
+        }
+        public Vector2 OriginAdjustedLastPosition
+        {
+            get { return lastPosition - origin; }
+        }
+        public Vector2 Velocity
+        {
+            get { return velocity; }
         }
     }
 }
