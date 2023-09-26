@@ -42,8 +42,6 @@ namespace pong
                     isPressed = !isPressed;
 
             }
-            if (isPressed) { buttonColor = Color.Red; }
-            else { buttonColor = Color.GreenYellow; }
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
