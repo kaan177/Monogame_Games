@@ -78,6 +78,7 @@ namespace pong
                         player.Reset();
                     }
                     pong.Players[0].TakeDamage(1);
+                    pong.Players[4].TakeDamage(1);
                 }
                 if (position.X >= Pong.screenSize.X + origin.X)
                 {
@@ -87,6 +88,7 @@ namespace pong
                         player.Reset();
                     }
                     pong.Players[1].TakeDamage(1);
+                    pong.Players[5].TakeDamage(1);
                 }
                 //returns false for all paths. If the ball collides nothing should be done with the information as the game should reset
                 return false;

@@ -51,7 +51,6 @@ namespace pong
                 velocity = moveDirection * speed;
             }
             velocity = Vector2.Zero;
-
         }
         Vector2 CalculateOptimalPosition()
         {
