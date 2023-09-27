@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace pong
 {
-    internal class Player : GameObject
+    internal class Player : MovingGameObject
     {
         //Class variables.
         Texture2D redHeartTex, blueHeartTex, greenHeartTex, pinkHeartTex;

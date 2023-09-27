@@ -3,11 +3,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
-using System.Collections.Generic;
 
 namespace pong
 {
-    internal class Ball : GameObject
+    internal class Ball : MovingGameObject
     {
         SoundEffect hitSound, edgeHitSound, borderHitSound;
 
@@ -18,6 +17,8 @@ namespace pong
         float lastFlicker, flickerTime;
         int totalFlickers;
         bool flicker, renderBall;
+
+        int lastPaddleHit;
 
         public Ball(Vector2 _startPosition, ContentManager _content, Pong _pong) : base(_content, "ball", _startPosition, _pong)
         {
@@ -62,7 +63,9 @@ namespace pong
                             checkForCollisions = true;
                 }
                 if (CheckVerticalBorders() || CheckHorizontalBorders())
-                    checkForCollisions = true;  
+                    checkForCollisions = true;
+                if(pong.PowerUps.IsActive)
+                    CheckPowerUps();
             }
         }
 
@@ -317,9 +320,20 @@ namespace pong
                 position += velocity * lostDistance;
                 velocity *= currentSpeed;
 
+                lastPaddleHit = player.PlayerId;
                 return true;
             }
             return false;
+        }
+        void CheckPowerUps()
+        {
+            Vector2 topLeftBound = new Vector2(pong.PowerUps.Position.X - pong.PowerUps.Origin.X, pong.PowerUps.Position.Y - pong.PowerUps.Origin.Y);
+            Vector2 bottomRightBound = new Vector2(pong.PowerUps.Position.X + pong.PowerUps.Origin.X, pong.PowerUps.Position.Y + pong.PowerUps.Origin.Y);
+            Vector2? boxIntersection = CollisionHelper.BoxIntersection(lastPosition, position - lastPosition, topLeftBound, bottomRightBound, 1f);
+            if (boxIntersection.HasValue) 
+            {
+                pong.PowerUps.GetHit(lastPaddleHit);
+            }
         }
         public override void Reset()
         {
@@ -374,7 +388,10 @@ namespace pong
         {
             get { return lastPosition; }
         }
-       
+       public int LastPaddleHit
+        {
+            get { return lastPaddleHit;}
+        }
     }
 }
 

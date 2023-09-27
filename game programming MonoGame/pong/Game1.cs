@@ -22,6 +22,7 @@ namespace pong
         Player[] players = new Player[8];
         Ball ball;
         Emotes emotes;
+        PowerUps powerUps;
 
         MainMenu mainMenu;
         GameOverScreen gameOverScreen;
@@ -54,11 +55,10 @@ namespace pong
 
             standardFont = Content.Load<SpriteFont>("standardFont");
 
-            //Constructing Objects.
-
-            //Constructing GameObjects.
+            //instantiating objects.
             ball = new Ball(screenSize / 2, Content, this);
             emotes = new Emotes(Content);
+            powerUps = new PowerUps(Content, "powerUp", Vector2.Zero, this);
             mainMenu = new MainMenu(standardFont, Content);
             gameOverScreen = new GameOverScreen(standardFont, Content);
 
@@ -150,6 +150,7 @@ namespace pong
 
                     ball.ReCalculateStartPosition();
                     ball.Reset();
+                    powerUps.Reset();
                     foreach (Player player in players)
                     {
                         player.ReCalculateAfterScreenChange();
@@ -182,6 +183,7 @@ namespace pong
                 }
                 lastGameState = gameState;
                 ball.Update(gameTime);
+                powerUps.Update(gameTime);
                 foreach (Player player in players)
                 {
                     player.Update(gameTime);
@@ -202,6 +204,7 @@ namespace pong
             }
             if (gameState == GameState.Playing)
             {
+                powerUps.Draw(spriteBatch);
                 ball.Draw(spriteBatch);
                 foreach (Player player in players)
                 {
@@ -339,6 +342,10 @@ namespace pong
         internal Player[] Players
         {
             get { return players; } 
+        }
+        internal PowerUps PowerUps
+        {
+            get { return powerUps; }
         }
 
     }
