@@ -74,8 +74,6 @@ namespace pong
 
         protected override void Update(GameTime gameTime)
         {
-            lastGameState = gameState;
-
             if (gameState == GameState.MainMenu)
             {
                 if (lastGameState != GameState.MainMenu)
@@ -90,13 +88,28 @@ namespace pong
                     }
                 }
                 mainMenu.Update();
+                if (mainMenu.player4ModeBut.isPressed)
+                {
+                    isFourPlayers = true;
+                }
+                else
+                {
+                    isFourPlayers = false;
+                }
+                if (mainMenu.botBut.isPressed)
+                {
+                    isBots = true;
+                }
+                else
+                {
+                    isBots = false;
+                }
                 if (mainMenu.startBut.isPressed)
                 {
                     gameState = GameState.Playing; 
                     mainMenu.startBut.isPressed = false;
                 }
                     
-
                 if (mainMenu.exitBut.isPressed)
                     Exit();
             }
@@ -105,6 +118,7 @@ namespace pong
             {
                 if (lastGameState != gameState)
                     IsMouseVisible = true;
+                lastGameState = gameState;
                 gameOverScreen.Update();
                 emotes.HandleInput(gameTime);
                 if (gameOverScreen.replayBut.isPressed)
@@ -118,7 +132,6 @@ namespace pong
                     gameState = GameState.MainMenu; 
                     gameOverScreen.mainMenuBut.isPressed = false;
                 }
-                lastGameState = gameState;
             }
 
             if (gameState == GameState.Playing)

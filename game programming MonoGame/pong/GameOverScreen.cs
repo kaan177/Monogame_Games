@@ -41,8 +41,8 @@ namespace pong
             mainMenuText = "Main menu";
             replayText = "Play again";
 
-            mainMenuBut = new Button(mainMenuPos, buttonSize, mainMenuText, buttonTex, standardFont);
-            replayBut = new Button(replayPos, buttonSize, replayText, buttonTex, standardFont);
+            mainMenuBut = new Button(mainMenuPos, buttonSize, mainMenuText, buttonTex, standardFont, false);
+            replayBut = new Button(replayPos, buttonSize, replayText, buttonTex, standardFont, false);
         }
 
         public void Update()

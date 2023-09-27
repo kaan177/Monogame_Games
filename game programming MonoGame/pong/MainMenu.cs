@@ -45,11 +45,11 @@ namespace pong
             startStr = "Start";
             exitStr = "";
 
-            player4ModeBut = new Button(player4ModePos, buttonSize, player4ModeStr, buttonTex, _standardFont);
-            powerUpsBut = new Button(powerUpsPos, buttonSize, powerUpsStr, buttonTex, _standardFont);
-            botBut = new Button(botPos, buttonSize, botStr, buttonTex, _standardFont);
-            startBut = new Button(startPos, buttonSize, startStr, buttonTex, _standardFont);
-            exitBut = new Button(exitPos, buttonSize, exitStr, exitTex, _standardFont);
+            player4ModeBut = new Button(player4ModePos, buttonSize, player4ModeStr, buttonTex, _standardFont, false);
+            powerUpsBut = new Button(powerUpsPos, buttonSize, powerUpsStr, buttonTex, _standardFont, false);
+            botBut = new Button(botPos, buttonSize, botStr, buttonTex, _standardFont, false);
+            startBut = new Button(startPos, buttonSize, startStr, buttonTex, _standardFont, false);
+            exitBut = new Button(exitPos, buttonSize, exitStr, exitTex, _standardFont,  true);
 
             gameNamePosition = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 6) - standardFont.MeasureString(gameName) / 2;
 

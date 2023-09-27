@@ -50,7 +50,6 @@ namespace pong
                 moveDirection.Normalize();
                 velocity = moveDirection * speed;
             }
-            velocity = Vector2.Zero;
         }
         Vector2 CalculateOptimalPosition()
         {
