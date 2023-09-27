@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,10 +16,10 @@ namespace pong
         KeyboardState keyboard;
         bool isVertical;
         bool isAlive;
-        int playerId;
+        protected int playerId;
         int maxHealth = 3;
         int health;
-        int speed = 6;
+        protected int speed = 360;
 
 
         public Player(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_content, _paddleTex, _startPosition, _pong)
@@ -121,53 +119,53 @@ namespace pong
                 HandleInput();
                 base.Update(gameTime);
 
-                // Resolving collision with the screen.
+                // Resolving collision with the screen and other paddles.
                 if (isVertical)
                 {
-                    if (position.Y < origin.Y + origin.X)
+                    if (position.Y < origin.Y + 2 * origin.X)
                     {
-                        position.Y = origin.Y + origin.X;
+                        position.Y = origin.Y + 2 * origin.X;
                         velocity.Y = 0f;
                     }
-                    if (position.Y > Pong.screenSize.Y - origin.Y - origin.X)
+                    if (position.Y > Pong.screenSize.Y - origin.Y - 2 * origin.X)
                     {
-                        position.Y = Pong.screenSize.Y - origin.Y - origin.X;
+                        position.Y = Pong.screenSize.Y - origin.Y - 2 * origin.X;
                         velocity.Y = 0f;
                     }
                 }
                 else
                 {
-                    if (position.X < origin.X + origin.Y)
+                    if (position.X < origin.X + 2 * origin.Y)
                     {
-                        position.X = origin.X + origin.Y;
+                        position.X = origin.X + 2 * origin.Y;
                         velocity.X = 0f;
                     }
-                    if (position.X > Pong.screenSize.X - origin.X - origin.Y)
+                    if (position.X > Pong.screenSize.X - origin.X - 2 * origin.Y)
                     {
-                        position.X = Pong.screenSize.X - origin.X - origin.Y;
+                        position.X = Pong.screenSize.X - origin.X - 2 * origin.Y;
                         velocity.X = 0f;
                     }
                 }
             }
         }
 
-        void HandleInput()
+        protected virtual void HandleInput()
         {
             // Taking player input and setting velocity accordingly.
             keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(keyup) && !keyboard.IsKeyDown(keydown))
             {
                 if (isVertical)
-                    velocity.Y = -360f;
+                    velocity.Y = -speed;
                 else
-                    velocity.X = 360f;
+                    velocity.X = speed;
             }
             else if (keyboard.IsKeyDown(keydown) && !keyboard.IsKeyDown(keyup))
             {
                 if (isVertical)
-                    velocity.Y = 360f;
+                    velocity.Y = speed;
                 else
-                    velocity.X = -360f;
+                    velocity.X = -speed;
             }
             else
                 velocity = Vector2.Zero;
@@ -190,7 +188,7 @@ namespace pong
             health = maxHealth;
             position = startPosition;
         }
-        public void ReCalculateStartPosition()
+        public virtual void ReCalculateAfterScreenChange()
         {
             switch (playerId)
             {

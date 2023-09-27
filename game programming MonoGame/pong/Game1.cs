@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
+using System.CodeDom;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,13 +16,13 @@ namespace pong
 
         GameState lastGameState, gameState;
         bool isFourPlayers;
+        bool isBots;
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
         SpriteFont standardFont;
-
-        List<Player> players = new List<Player>(4);
+        Player[] players = new Player[8];
         Ball ball;
         Emotes emotes;
 
@@ -48,6 +48,7 @@ namespace pong
         {
             gameState = GameState.MainMenu;
             isFourPlayers = true;
+            isBots = true;
 
             screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
             CenterOfScreen = new Vector2(screenSize.X, screenSize.Y) / 2;
@@ -64,12 +65,17 @@ namespace pong
             welcomeTextOrigin = standardFont.MeasureString(welcomeText) / 2;
 
             //Constructing GameObjects.
-            players.Add(new Player(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.W, Keys.S, 0, true, Content, this));
-            players.Add(new Player(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.Up, Keys.Down, 1, true, Content, this));
-            players.Add(new Player(new Vector2(screenSize.X / 2, 0), "groeneSpeler", Keys.D2, Keys.D1, 2, false, Content, this));
-            players.Add(new Player(new Vector2(screenSize.X / 2, screenSize.Y), "rozeSpeler", Keys.D0, Keys.D9, 3, false, Content, this));
             ball = new Ball(screenSize / 2, Content, this);
             emotes = new Emotes(Content);
+
+            players[0] = new Player(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.W, Keys.S, 0, true, Content, this);
+            players[1] = new Player(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.Up, Keys.Down, 1, true, Content, this);
+            players[2] = new Player(new Vector2(screenSize.X / 2, 0), "groeneSpeler", Keys.D2, Keys.D1, 2, false, Content, this);
+            players[3] = new Player(new Vector2(screenSize.X / 2, screenSize.Y), "rozeSpeler", Keys.D0, Keys.D9, 3, false, Content, this);
+            players[4] = new Bot(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.A, Keys.A, 0, true, Content, this, true);
+            players[5] = new Bot(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.A, Keys.A, 1, true, Content, this, true);
+            players[6] = new Bot(new Vector2(screenSize.X / 2, 0), "groeneSpeler", Keys.A, Keys.A, 2, false, Content, this, true);
+            players[7] = new Bot(new Vector2(screenSize.X / 2, screenSize.Y), "rozeSpeler", Keys.A, Keys.A, 3, false, Content, this, true);
         }
 
         protected override void Update(GameTime gameTime)
@@ -119,13 +125,32 @@ namespace pong
                     ball.Reset();
                     foreach (Player player in players)
                     {
-                        player.ReCalculateStartPosition();
+                        player.ReCalculateAfterScreenChange();
                         player.GameReset();
                     }
-                    if (!isFourPlayers)
+                    if (isBots)
                     {
-                        players[2].IsAlive = false;
-                        players[3].IsAlive = false;
+                        for(int i = 0; i < 4; i++)
+                        {
+                            players[i].IsAlive = false;
+                        }
+                        if (!isFourPlayers)
+                        {              
+                            players[6].IsAlive = false;
+                            players[7].IsAlive = false;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 4; i < 8; i++)
+                        {
+                            players[i].IsAlive = false;
+                        }
+                        if (!isFourPlayers)
+                        {
+                            players[2].IsAlive = false;
+                            players[3].IsAlive = false;
+                        }
                     }
                 }
                 lastGameState = gameState;
@@ -214,11 +239,19 @@ namespace pong
         {
             get { return isFourPlayers; }
         }
+        public bool IsBots
+        {
+            get { return isBots; }
+        }
         public static Random Random
         {
             get; private set;
         }
-        internal List<Player> Players
+        internal Ball Ball
+        {
+            get { return ball; }
+        }
+        internal Player[] Players
         {
             get { return players; } 
         }

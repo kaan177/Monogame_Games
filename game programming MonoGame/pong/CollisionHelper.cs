@@ -4,7 +4,7 @@ namespace pong
 {
     public static class CollisionHelper
     {
-        public static Vector2? VerticalIntersection(Vector2 supportVector, Vector2 directionVector, float xCoordinate, float? minY, float? maxY)
+        public static Vector2? VerticalIntersection(Vector2 supportVector, Vector2 directionVector, float xCoordinate, float? minY, float? maxY, float? maxLambda)
         {
             //Check if directionVector.X is not zero(it would break the code and it would never collide with the Y axis anyways)
             if (directionVector.X == 0f)
@@ -14,9 +14,14 @@ namespace pong
             //So: lambda = (x = sV.X) / sV.X
             float lambda = (xCoordinate - supportVector.X) / directionVector.X;
 
-            //make sure to only check in the direction of the Vector(not in the opposite direction) as well as make sure the intersection doesn't lie beyond the current position
-            if (lambda < 0 || lambda > 1)
+            //make sure to only check in the direction of the Vector(not in the opposite direction, and not on the exact support Vector) as well as make sure the intersection doesn't lie beyond the current position
+            if (lambda <= 0)
                 return null;
+            else if (maxLambda.HasValue)
+            {
+                if (lambda > maxLambda)
+                    return null;
+            }
 
             // y = sV.Y + lambda * dV.Y
             float yCoordinate = (supportVector.Y + lambda * directionVector.Y);
@@ -32,7 +37,7 @@ namespace pong
             else
                 return new Vector2(xCoordinate, yCoordinate);
         }
-        public static Vector2? HorizontalIntersection(Vector2 supportVector, Vector2 directionVector, float yCoordinate, float? minX, float? maxX)
+        public static Vector2? HorizontalIntersection(Vector2 supportVector, Vector2 directionVector, float yCoordinate, float? minX, float? maxX, float? maxLambda)
         {
             //Check if directionVector.Y is not zero(it would break the code and it would never collide with the X axis anyways)
             if (directionVector.Y == 0f)
@@ -42,9 +47,14 @@ namespace pong
             //So: lambda = (Y - sV.Y) / sV.Y
             float lambda = (yCoordinate - supportVector.Y) / directionVector.Y;
 
-            //make sure to only check in the direction of the Vector(not in the opposite direction) as well as make sure the intersection doesn't lie beyond the current position
-            if (lambda < 0 || lambda > 1)
+            //make sure to only check in the direction of the Vector(not in the opposite direction, and not on the exact support Vector) as well as make sure the intersection doesn't lie beyond the current position
+            if (lambda <= 0)
                 return null;
+            else if(maxLambda.HasValue)
+            {
+                if(lambda > maxLambda) 
+                    return null;
+            }
 
             //x = sV.X + lambda * dV.X 
             float xCoordinate = (supportVector.X + lambda * directionVector.X);
@@ -60,13 +70,13 @@ namespace pong
             else
                 return new Vector2(xCoordinate, yCoordinate);
         }
-        public static Vector2? BoxIntersection(Vector2 supportVector, Vector2 directionVector, Vector2 topLeftBound, Vector2 bottomRightBound)
+        public static Vector2? BoxIntersection(Vector2 supportVector, Vector2 directionVector, Vector2 topLeftBound, Vector2 bottomRightBound, float? maxLambda)
         {
             //cheeck all possible intersections(all four sides of the box)
-            Vector2? possiblePos1 = VerticalIntersection(supportVector, directionVector, topLeftBound.X, topLeftBound.Y, bottomRightBound.Y);
-            Vector2? possiblePos2 = VerticalIntersection(supportVector, directionVector, bottomRightBound.X, topLeftBound.Y, bottomRightBound.Y);
-            Vector2? possiblePos3 = HorizontalIntersection(supportVector, directionVector, topLeftBound.Y, topLeftBound.X, bottomRightBound.X);
-            Vector2? possiblePos4 = HorizontalIntersection(supportVector, directionVector, bottomRightBound.Y, topLeftBound.X, bottomRightBound.X);
+            Vector2? possiblePos1 = VerticalIntersection(supportVector, directionVector, topLeftBound.X, topLeftBound.Y, bottomRightBound.Y, maxLambda);
+            Vector2? possiblePos2 = VerticalIntersection(supportVector, directionVector, bottomRightBound.X, topLeftBound.Y, bottomRightBound.Y, maxLambda);
+            Vector2? possiblePos3 = HorizontalIntersection(supportVector, directionVector, topLeftBound.Y, topLeftBound.X, bottomRightBound.X, maxLambda);
+            Vector2? possiblePos4 = HorizontalIntersection(supportVector, directionVector, bottomRightBound.Y, topLeftBound.X, bottomRightBound.X, maxLambda);
 
             //create local Variables for setting the right collision position and telling if a collision has occurred  
             Vector2? collisionPosition = null;
