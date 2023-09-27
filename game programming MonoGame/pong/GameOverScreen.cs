@@ -8,10 +8,10 @@ namespace pong
     {
         SpriteFont standardFont;
 
-        public string dynamicText;
+        public string dynamicText = "No one won";
         public Button mainMenuBut, replayBut;
 
-        public Color dynamicCol;
+        public Color dynamicCol = Color.White;
 
         Vector2 mainMenuPos, replayPos, dynamicTextPos;
         Vector2 buttonSize;

@@ -16,7 +16,6 @@ namespace pong
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
         SpriteFont standardFont;
 
         Ball ball;
@@ -25,8 +24,6 @@ namespace pong
 
         MainMenu mainMenu;
         GameOverScreen gameOverScreen;
-
-        Color gameOverColor;
 
         static void Main()
         {
@@ -70,6 +67,7 @@ namespace pong
 
             if (gameState == GameState.MainMenu)
             {   
+                IsMouseVisible = true;
                 mainMenu.Update();
                 if (mainMenu.start.isPressed)
                     gameState = GameState.Playing; mainMenu.start.isPressed = false;
@@ -83,7 +81,7 @@ namespace pong
                 gameOverScreen.Update();
 
                 emotes.HandleInput(gameTime);
-                KeyboardState keyboard = Keyboard.GetState();
+                IsMouseVisible = true;
                 if (gameOverScreen.replayBut.isPressed)
                     gameState = GameState.Playing; gameOverScreen.replayBut.isPressed = false;
 
@@ -93,6 +91,7 @@ namespace pong
 
             if (gameState == GameState.Playing)
             {
+                IsMouseVisible = false;
                 if (lastGameState != gameState)
                 {
                     ball.Reset();

@@ -1,12 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pong
 {
@@ -14,7 +8,7 @@ namespace pong
     {   
         MouseState mouse, previousMouse;
         Vector2 topLeftPoint, textPosition;
-        string buttonText, name;
+        string buttonText;
         public bool isPressed = false;
         Texture2D buttonTexture;
         Rectangle rectangle;
