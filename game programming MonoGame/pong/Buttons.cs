@@ -7,29 +7,34 @@ namespace pong
     internal class Button
     {   
         MouseState mouse, previousMouse;
-        Vector2 topLeftPoint, textPosition;
+        Vector2 topLeftPosition, textPosition;
         string buttonText;
-        public bool isPressed = false;
+        public bool isPressed;
         Texture2D buttonTexture;
-        Rectangle rectangle;
+        Rectangle mouseDetector;
         SpriteFont standardFont;
-        Color buttonColor = Color.Green;
+        Color buttonColor;
 
         public Button(Vector2 _topLeftPoint, Vector2 _size, string _buttonText, Texture2D _buttonTexture, SpriteFont _standardFont)
-        {   
-            topLeftPoint = _topLeftPoint;
+        {
+
+            //Loading and setting standard variables
+            topLeftPosition = _topLeftPoint;
             buttonText = _buttonText;
             buttonTexture = _buttonTexture;
-            rectangle = new Rectangle(_topLeftPoint.ToPoint(), _size.ToPoint());
             standardFont = _standardFont;
-            textPosition = rectangle.Center.ToVector2() - standardFont.MeasureString(buttonText) / 2;
-            
+
+            mouseDetector = new Rectangle(_topLeftPoint.ToPoint(), _size.ToPoint());
+            textPosition = mouseDetector.Center.ToVector2() - standardFont.MeasureString(buttonText) / 2; //Centering the text in the rectangle
+            isPressed = false;
+            buttonColor = Color.Green;
         }
         public void Update()
         {
+            //Detecting if the mouse is with in the button and if its pressed
             previousMouse = mouse;
             mouse = Mouse.GetState();
-            if (rectangle.Contains(mouse.Position))
+            if (mouseDetector.Contains(mouse.Position))
             {
                 buttonColor = Color.Blue;
                 if (mouse.LeftButton == ButtonState.Pressed && previousMouse.LeftButton != ButtonState.Pressed)
@@ -40,8 +45,9 @@ namespace pong
                 buttonColor = Color.Green;
         }
         public void Draw(SpriteBatch _spriteBatch)
-        {
-            _spriteBatch.Draw(buttonTexture, topLeftPoint, buttonColor);
+        {   
+            //Drawing the button texture and the text within
+            _spriteBatch.Draw(buttonTexture, topLeftPosition, buttonColor);
             _spriteBatch.DrawString(standardFont, buttonText, textPosition, Color.Black);
         }
 

@@ -39,9 +39,11 @@ namespace pong
         }
 
         protected override void LoadContent()
-        {
+        {   
+            //Setting the start Game State
             gameState = GameState.MainMenu;
 
+            //Setting helper variables
             screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
             CenterOfScreen = new Vector2(screenSize.X, screenSize.Y) / 2;
             spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -65,14 +67,19 @@ namespace pong
         {
             lastGameState = gameState;
 
+            //Updating the different Game States and switching between game states
             if (gameState == GameState.MainMenu)
             {   
                 IsMouseVisible = true;
                 mainMenu.Update();
-                if (mainMenu.start.isPressed)
-                    gameState = GameState.Playing; mainMenu.start.isPressed = false;
+                if (mainMenu.startBut.isPressed)
+                {
+                    gameState = GameState.Playing; 
+                    mainMenu.startBut.isPressed = false;
+                }
+                    
 
-                if (mainMenu.exit.isPressed)
+                if (mainMenu.exitBut.isPressed)
                     Exit();
             }
 
@@ -83,10 +90,17 @@ namespace pong
                 emotes.HandleInput(gameTime);
                 IsMouseVisible = true;
                 if (gameOverScreen.replayBut.isPressed)
-                    gameState = GameState.Playing; gameOverScreen.replayBut.isPressed = false;
+                {
+                    gameState = GameState.Playing; 
+                    gameOverScreen.replayBut.isPressed = false;
+                }
 
                 if (gameOverScreen.mainMenuBut.isPressed)
-                    gameState = GameState.MainMenu; gameOverScreen.mainMenuBut.isPressed = false;
+                {
+                    gameState = GameState.MainMenu; 
+                    gameOverScreen.mainMenuBut.isPressed = false;
+                }
+                    
             }
 
             if (gameState == GameState.Playing)
@@ -111,6 +125,7 @@ namespace pong
             GraphicsDevice.Clear(Color.Black);
             spriteBatch.Begin();
 
+            //Drawing the different Game States
             if (gameState == GameState.MainMenu)
             {
                 mainMenu.Draw(spriteBatch);
@@ -138,13 +153,13 @@ namespace pong
         {
             if (losingPlayer == 1)
             {
-                gameOverScreen.dynamicText = "Game Over: Red wins!";
-                gameOverScreen.dynamicCol = Color.Red;
+                gameOverScreen.victoryText = "Game Over: Red wins!";
+                gameOverScreen.victoryCol = Color.Red;
             }
             else
             {
-                gameOverScreen.dynamicText = "Game Over: Blue wins!";
-                gameOverScreen.dynamicCol = Color.Blue;
+                gameOverScreen.victoryText = "Game Over: Blue wins!";
+                gameOverScreen.victoryCol = Color.Blue;
             }
             gameState = GameState.GameOver;
         }
