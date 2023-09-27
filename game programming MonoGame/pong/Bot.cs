@@ -11,35 +11,55 @@ namespace pong
         public Bot(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong, bool _isExtremeDifficulty) : base(_startPosition, _paddleTex, _keyUp, _keyDown, _playerId, _isVertical, _content, _pong) 
         {
             isExtremeDifficulty = _isExtremeDifficulty;
-            lineLeft = pong.Ball.Origin.X;
-            lineRight = Pong.screenSize.X - pong.Ball.Origin.X;
-            lineTop = pong.Ball.Origin.Y;
-            lineBottom = Pong.screenSize.Y - pong.Ball.Origin.Y;
+            ReCalculateAfterScreenChange();
         }
-        
+
+        public override void Update(GameTime gameTime)
+        {
+            CalculateVelocity(gameTime);
+            base.Update(gameTime);
+        }
         protected override void HandleInput()
         {
-            //I chose to repurpose the handle input method for moving the bot, as for the bot the optimal position is a form of input
+            //not needed for a bot
+        }
+
+        public void CalculateVelocity(GameTime gameTime)
+        {
             Vector2 optimalPosition = CalculateOptimalPosition();
+            switch (playerId)
+            {
+                case 0:
+                    optimalPosition.X -= Width;
+                    break;
+                case 1:
+                    optimalPosition.X += Width;
+                    break;
+                case 2:
+                    optimalPosition.Y -= Height;
+                    break;
+                case 3:
+                    optimalPosition.Y += Height;
+                    break;
+            }
             Vector2 moveDirection = (optimalPosition - position);
-            if (moveDirection != Vector2.Zero)
+            if (moveDirection.Length() <= speed * (float)gameTime.ElapsedGameTime.TotalSeconds)
+                velocity = moveDirection / (float)gameTime.ElapsedGameTime.TotalSeconds;
+            else
             {
                 moveDirection.Normalize();
                 velocity = moveDirection * speed;
             }
-            else
-            {
-                velocity = Vector2.Zero;
-            }
-        }
+            velocity = Vector2.Zero;
 
+        }
         Vector2 CalculateOptimalPosition()
         {
             Vector2 ballPosition = pong.Ball.LastPosition;
-            Vector2 optimalPosition;
+            Vector2 optimalPosition = Vector2.Zero;
             Vector2? collisionPosition;
             Vector2 direction = (pong.Ball.Position - ballPosition);
-            for (; ;)
+            for (int i = 0; i < 100; i++)
             {
                 if (direction == Vector2.Zero)
                 {
@@ -111,6 +131,22 @@ namespace pong
                         ballPosition = collisionPosition.Value;            
                     }
                 }
+                //this switch is so that the optimal position will be following the ball if the loop hasn't found anything after 100 iterations
+                switch (playerId)
+                {
+                    case 0:
+                        optimalPosition = new Vector2(lineLeft, ballPosition.Y);
+                        break;
+                    case 1:
+                        optimalPosition = new Vector2(lineRight, ballPosition.Y);
+                        break;
+                    case 2:
+                        optimalPosition = new Vector2(ballPosition.X, lineTop);
+                        break;
+                    case 3:
+                        optimalPosition = new Vector2(ballPosition.X, lineBottom);
+                        break;
+                }
             }
             return optimalPosition;
         }
@@ -121,6 +157,21 @@ namespace pong
             lineRight = Pong.screenSize.X - pong.Ball.Origin.X;
             lineTop = pong.Ball.Origin.Y;
             lineBottom = Pong.screenSize.Y - pong.Ball.Origin.Y;
+            switch (playerId)
+            {
+                case 0:
+                    lineLeft += Width;
+                    break;
+                case 1:
+                    lineRight -= Width;
+                    break;
+                case 2:
+                    lineTop += Height;
+                    break;
+                case 3:
+                    lineBottom -= Height;
+                    break;
+            }
         }
     }
 }

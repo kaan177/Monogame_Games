@@ -130,7 +130,7 @@ namespace pong
                     }
                     if (isBots)
                     {
-                        for(int i = 0; i < 4; i++)
+                        for(int i = 1; i < 5; i++)
                         {
                             players[i].IsAlive = false;
                         }
@@ -209,29 +209,92 @@ namespace pong
                     livingPlayer = player.PlayerId;
                 }
             }
-            if(alivePlayers <= 1)
+            if(isBots)
             {
-                switch(livingPlayer)
+                if (!isFourPlayers)
                 {
-                    case 0:
+                    if (alivePlayers <= 1)
+                    {
+                        switch (livingPlayer)
+                        {
+                            case 0:
+                                dynamicGameOverText = "Game Over: Red wins!";
+                                gameOverColor = Color.Red;
+                                break;
+                            case 1:
+                                dynamicGameOverText = "Game Over: Blue wins!";
+                                gameOverColor = Color.Blue;
+                                break;
+                        }
+                        gameState = GameState.GameOver;
+                        dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
+                    }
+                }
+                else
+                {
+                    if (!players[0].IsAlive)
+                    {
+                        if (alivePlayers <= 1)
+                        {
+                            switch (livingPlayer)
+                            {
+                                case 1:
+                                    dynamicGameOverText = "Game Over: Blue wins!";
+                                    gameOverColor = Color.Blue;
+                                    break;
+                                case 2:
+                                    dynamicGameOverText = "Game Over: Green wins!";
+                                    gameOverColor = Color.Green;
+                                    break;
+                                case 3:
+                                    dynamicGameOverText = "Game Over: Pink wins!";
+                                    gameOverColor = Color.Magenta;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            dynamicGameOverText = "Game Over: Bots win!";
+                            gameOverColor = Color.White;    
+                        }
+                        gameState = GameState.GameOver;
+                        dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
+                    }
+                    else if(alivePlayers <=1)
+                    {
                         dynamicGameOverText = "Game Over: Red wins!";
                         gameOverColor = Color.Red;
-                        break;
-                    case 1:
-                        dynamicGameOverText = "Game Over: Blue wins!";
-                        gameOverColor = Color.Blue;
-                        break;
-                    case 2:
-                        dynamicGameOverText = "Game Over: Green wins!";
-                        gameOverColor = Color.Green;
-                        break;
-                    case 3:
-                        dynamicGameOverText = "Game Over: Pink wins!";
-                        gameOverColor = Color.Magenta;
-                        break;
+                        gameState = GameState.GameOver;
+                        dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
+                    }
                 }
-                gameState = GameState.GameOver;
-                dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
+            }
+            else
+            {
+                if (alivePlayers <= 1)
+                {
+                    switch (livingPlayer)
+                    {
+                        case 0:
+                            dynamicGameOverText = "Game Over: Red wins!";
+                            gameOverColor = Color.Red;
+                            break;
+                        case 1:
+                            dynamicGameOverText = "Game Over: Blue wins!";
+                            gameOverColor = Color.Blue;
+                            break;
+                        case 2:
+                            dynamicGameOverText = "Game Over: Green wins!";
+                            gameOverColor = Color.Green;
+                            break;
+                        case 3:
+                            dynamicGameOverText = "Game Over: Pink wins!";
+                            gameOverColor = Color.Magenta;
+                            break;
+                    }
+                    gameState = GameState.GameOver;
+                    dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
+                }
             }
 
         }
