@@ -1,6 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -20,16 +18,13 @@ namespace pong
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
         SpriteFont standardFont;
         Player[] players = new Player[8];
         Ball ball;
         Emotes emotes;
 
-        string dynamicGameOverText, gameOverText1, gameOverText2, welcomeText;
-        Vector2 dynamicGameOverTextOrigin, gameOverText1Origin, gameOverText2Origin, welcomeTextOrigin;
-
-        Color gameOverColor;
+        MainMenu mainMenu;
+        GameOverScreen gameOverScreen;
 
         static void Main()
         {
@@ -45,28 +40,26 @@ namespace pong
         }
 
         protected override void LoadContent()
-        {
+        {   
+            //Setting the start Game State
             gameState = GameState.MainMenu;
             isFourPlayers = true;
             isBots = true;
 
+            //Setting helper variables
             screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
             CenterOfScreen = new Vector2(screenSize.X, screenSize.Y) / 2;
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             standardFont = Content.Load<SpriteFont>("standardFont");
 
-            gameOverText1 = "Press <Space> to play again";
-            gameOverText2 = "press <Escape> to return to welcome screen";
-            welcomeText = "Welcome to Pong, press <Space> to start";
-            gameOverText1Origin = standardFont.MeasureString(gameOverText1) / 2;
-            gameOverText2Origin = standardFont.MeasureString(gameOverText2) / 2;
-
-            welcomeTextOrigin = standardFont.MeasureString(welcomeText) / 2;
+            //Constructing Objects.
 
             //Constructing GameObjects.
             ball = new Ball(screenSize / 2, Content, this);
             emotes = new Emotes(Content);
+            mainMenu = new MainMenu(standardFont, Content);
+            gameOverScreen = new GameOverScreen(standardFont, Content);
 
             players[0] = new Player(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.W, Keys.S, 0, true, Content, this);
             players[1] = new Player(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.Up, Keys.Down, 1, true, Content, this);
@@ -80,10 +73,13 @@ namespace pong
 
         protected override void Update(GameTime gameTime)
         {
+            lastGameState = gameState;
+
             if (gameState == GameState.MainMenu)
             {
-                if(lastGameState != GameState.MainMenu)
+                if (lastGameState != GameState.MainMenu)
                 {
+                    IsMouseVisible = true;
                     if (graphics.GraphicsDevice.Viewport.Width != 800)
                     {
                         graphics.PreferredBackBufferWidth = 800;
@@ -92,20 +88,36 @@ namespace pong
                         CenterOfScreen = screenSize / 2;
                     }
                 }
-                lastGameState = gameState;
-                if (Keyboard.GetState().IsKeyDown(Keys.Space))
-                    gameState = GameState.Playing;
+                mainMenu.Update();
+                if (mainMenu.startBut.isPressed)
+                {
+                    gameState = GameState.Playing; 
+                    mainMenu.startBut.isPressed = false;
+                }
+                    
+
+                if (mainMenu.exitBut.isPressed)
+                    Exit();
             }
 
             if (gameState == GameState.GameOver)
             {
-                lastGameState = gameState;
+                if (lastGameState != gameState)
+                    IsMouseVisible = true;
+                gameOverScreen.Update();
                 emotes.HandleInput(gameTime);
-                KeyboardState keyboard = Keyboard.GetState();
-                if (keyboard.IsKeyDown(Keys.Space))
-                    gameState = GameState.Playing;
-                if (keyboard.IsKeyDown(Keys.Escape))
-                    gameState = GameState.MainMenu;
+                if (gameOverScreen.replayBut.isPressed)
+                {
+                    gameState = GameState.Playing; 
+                    gameOverScreen.replayBut.isPressed = false;
+                }
+
+                if (gameOverScreen.mainMenuBut.isPressed)
+                {
+                    gameState = GameState.MainMenu; 
+                    gameOverScreen.mainMenuBut.isPressed = false;
+                }
+                lastGameState = gameState;
             }
 
             if (gameState == GameState.Playing)
@@ -113,7 +125,8 @@ namespace pong
                 if (lastGameState != gameState)
                 {
                     //make the playing field square if in 4 player mode
-                    if(isFourPlayers && graphics.GraphicsDevice.Viewport.Width != 480)
+                    IsMouseVisible = false;
+                    if (isFourPlayers && graphics.GraphicsDevice.Viewport.Width != 480)
                         graphics.PreferredBackBufferWidth = 480;
                     else if (!isFourPlayers && graphics.GraphicsDevice.Viewport.Width != 800)
                         graphics.PreferredBackBufferWidth = 800;
@@ -168,9 +181,10 @@ namespace pong
             GraphicsDevice.Clear(Color.Black);
             spriteBatch.Begin();
 
+            //Drawing the different Game States
             if (gameState == GameState.MainMenu)
             {
-                spriteBatch.DrawString(standardFont, welcomeText, CenterOfScreen - welcomeTextOrigin, Color.White);
+                mainMenu.Draw(spriteBatch);
             }
             if (gameState == GameState.Playing)
             {
@@ -187,9 +201,7 @@ namespace pong
                 {
                     player.Draw(spriteBatch);
                 }
-                spriteBatch.DrawString(standardFont, dynamicGameOverText, CenterOfScreen - dynamicGameOverTextOrigin - new Vector2(0, gameOverText1Origin.Y * 2.2f), gameOverColor);
-                spriteBatch.DrawString(standardFont, gameOverText1, CenterOfScreen - gameOverText1Origin, Color.White);
-                spriteBatch.DrawString(standardFont, gameOverText2, CenterOfScreen - gameOverText2Origin + new Vector2(0, gameOverText1Origin.Y * 2.2f), Color.White);
+                gameOverScreen.Draw(spriteBatch);
                 emotes.Draw(spriteBatch);
             }
 
@@ -239,33 +251,31 @@ namespace pong
                             switch (livingPlayer)
                             {
                                 case 1:
-                                    dynamicGameOverText = "Game Over: Blue wins!";
-                                    gameOverColor = Color.Blue;
+                                    gameOverScreen.victoryText = "Game Over: Blue wins!";
+                                    gameOverScreen.victoryCol = Color.Blue;
                                     break;
                                 case 2:
-                                    dynamicGameOverText = "Game Over: Green wins!";
-                                    gameOverColor = Color.Green;
+                                    gameOverScreen.victoryText = "Game Over: Green wins!";
+                                    gameOverScreen.victoryCol = Color.Green;
                                     break;
                                 case 3:
-                                    dynamicGameOverText = "Game Over: Pink wins!";
-                                    gameOverColor = Color.Magenta;
+                                    gameOverScreen.victoryText = "Game Over: Pink wins!";
+                                    gameOverScreen.victoryCol = Color.Magenta;
                                     break;
                             }
                         }
                         else
                         {
-                            dynamicGameOverText = "Game Over: Bots win!";
-                            gameOverColor = Color.White;    
+                            gameOverScreen.victoryText = "Game Over: Bots win!";
+                            gameOverScreen.victoryCol = Color.White;    
                         }
                         gameState = GameState.GameOver;
-                        dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
                     }
                     else if(alivePlayers <=1)
                     {
-                        dynamicGameOverText = "Game Over: Red wins!";
-                        gameOverColor = Color.Red;
+                        gameOverScreen.victoryText = "Game Over: Red wins!";
+                        gameOverScreen.victoryCol = Color.Red;
                         gameState = GameState.GameOver;
-                        dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
                     }
                 }
             }
@@ -276,24 +286,23 @@ namespace pong
                     switch (livingPlayer)
                     {
                         case 0:
-                            dynamicGameOverText = "Game Over: Red wins!";
-                            gameOverColor = Color.Red;
+                            gameOverScreen.victoryText = "Game Over: Red wins!";
+                            gameOverScreen.victoryCol = Color.Red;
                             break;
                         case 1:
-                            dynamicGameOverText = "Game Over: Blue wins!";
-                            gameOverColor = Color.Blue;
+                            gameOverScreen.victoryText = "Game Over: Blue wins!";
+                            gameOverScreen.victoryCol = Color.Blue;
                             break;
                         case 2:
-                            dynamicGameOverText = "Game Over: Green wins!";
-                            gameOverColor = Color.Green;
+                            gameOverScreen.victoryText = "Game Over: Green wins!";
+                            gameOverScreen.victoryCol = Color.Green;
                             break;
                         case 3:
-                            dynamicGameOverText = "Game Over: Pink wins!";
-                            gameOverColor = Color.Magenta;
+                            gameOverScreen.victoryText = "Game Over: Pink wins!";
+                            gameOverScreen.victoryCol = Color.Magenta;
                             break;
                     }
                     gameState = GameState.GameOver;
-                    dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
                 }
             }
 
