@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Drawing.Imaging;
-using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -27,9 +24,7 @@ namespace pong
         Emotes emotes;
 
         MainMenu mainMenu;
-
-        string dynamicGameOverText, gameOverText;
-        Vector2 dynamicGameOverTextOrigin, gameOverTextOrigin;
+        GameOverScreen gameOverScreen;
 
         Color gameOverColor;
 
@@ -56,17 +51,14 @@ namespace pong
 
             standardFont = Content.Load<SpriteFont>("standardFont");
 
-            gameOverText = "Press <Space> to play again, or press <Escape> to return to welcome screen";
-            gameOverTextOrigin = standardFont.MeasureString(gameOverText) / 2;
-
-            //Constructing players.
+            //Constructing Objects.
 
             player1 = new Player(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.W, Keys.S, 0, Content, this);
             player2 = new Player(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.Up, Keys.Down, 1, Content, this);
-            mainMenu = new MainMenu(standardFont, Content);
 
-            
-            //Constructing the ball.
+            mainMenu = new MainMenu(standardFont, Content);
+            gameOverScreen = new GameOverScreen(standardFont, Content);
+
             ball = new Ball(screenSize / 2, Content, player1, player2);
 
             emotes = new Emotes(Content);
@@ -79,24 +71,24 @@ namespace pong
             if (gameState == GameState.MainMenu)
             {   
                 mainMenu.Update();
-                Debug.WriteLine(mainMenu.startSignal.ToString());
-                if (mainMenu.startSignal)
-                {
-                    gameState = GameState.Playing;
-                    mainMenu.start.isPressed = false;
-                }
-                if (mainMenu.exitSignal)
+                if (mainMenu.start.isPressed)
+                    gameState = GameState.Playing; mainMenu.start.isPressed = false;
+
+                if (mainMenu.exit.isPressed)
                     Exit();
             }
 
             if (gameState == GameState.GameOver)
-            {
+            {   
+                gameOverScreen.Update();
+
                 emotes.HandleInput(gameTime);
                 KeyboardState keyboard = Keyboard.GetState();
-                if (keyboard.IsKeyDown(Keys.Space))
-                    gameState = GameState.Playing;
-                if (keyboard.IsKeyDown(Keys.Escape))
-                    gameState = GameState.MainMenu;
+                if (gameOverScreen.replayBut.isPressed)
+                    gameState = GameState.Playing; gameOverScreen.replayBut.isPressed = false;
+
+                if (gameOverScreen.mainMenuBut.isPressed)
+                    gameState = GameState.MainMenu; gameOverScreen.mainMenuBut.isPressed = false;
             }
 
             if (gameState == GameState.Playing)
@@ -132,11 +124,11 @@ namespace pong
                 emotes.Draw(spriteBatch);
             }
             if (gameState == GameState.GameOver)
-            {
+            {   
+
                 player1.Draw(spriteBatch);
                 player2.Draw(spriteBatch);
-                spriteBatch.DrawString(standardFont, dynamicGameOverText, CenterOfScreen - dynamicGameOverTextOrigin - new Vector2(0, gameOverTextOrigin.Y * 1.1f), gameOverColor);
-                spriteBatch.DrawString(standardFont, gameOverText, CenterOfScreen - gameOverTextOrigin + new Vector2(0, dynamicGameOverTextOrigin.Y * 1.1f), Color.White);
+                gameOverScreen.Draw(spriteBatch);
                 emotes.Draw(spriteBatch);
             }
 
@@ -147,16 +139,15 @@ namespace pong
         {
             if (losingPlayer == 1)
             {
-                dynamicGameOverText = "Game Over: Blue wins!";
-                gameOverColor = Color.Blue;
+                gameOverScreen.dynamicText = "Game Over: Red wins!";
+                gameOverScreen.dynamicCol = Color.Red;
             }
             else
             {
-                dynamicGameOverText = "Game Over: Red wins!";
-                gameOverColor = Color.Red;
+                gameOverScreen.dynamicText = "Game Over: Blue wins!";
+                gameOverScreen.dynamicCol = Color.Blue;
             }
             gameState = GameState.GameOver;
-            dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
         }
         public static Random Random
         {

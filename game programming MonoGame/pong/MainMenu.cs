@@ -22,11 +22,7 @@ namespace pong
         Vector2 player4ModePos, powerUpsPos, botPos, startPos, exitPos;
         string player4ModeStr, powerUpsStr, botStr, startStr, exitStr;
         Texture2D buttonTex, exitTex;
-
-        public bool exitSignal = false;
-        public bool startSignal = false;
-
-        
+              
 
 
 
@@ -69,11 +65,7 @@ namespace pong
             powerUps.Update();
             bot.Update();   
             start.Update();
-            exit.Update();
-
-            exitSignal = exit.isPressed;
-            startSignal = start.isPressed;
-            
+            exit.Update();            
         }
 
         public void Draw(SpriteBatch _spriteBatch)
