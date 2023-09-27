@@ -37,6 +37,7 @@ namespace pong
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             Random = new Random();
+            IsMouseVisible = true;
         }
 
         protected override void LoadContent()
@@ -230,16 +231,15 @@ namespace pong
                         switch (livingPlayer)
                         {
                             case 0:
-                                dynamicGameOverText = "Game Over: Red wins!";
-                                gameOverColor = Color.Red;
+                                gameOverScreen.victoryText = "Game Over: Red wins!";
+                                gameOverScreen.victoryCol = Color.Red;
                                 break;
                             case 1:
-                                dynamicGameOverText = "Game Over: Blue wins!";
-                                gameOverColor = Color.Blue;
+                                gameOverScreen.victoryText = "Game Over: Blue wins!";
+                                gameOverScreen.victoryCol = Color.Blue;
                                 break;
                         }
                         gameState = GameState.GameOver;
-                        dynamicGameOverTextOrigin = standardFont.MeasureString(dynamicGameOverText) / 2;
                     }
                 }
                 else

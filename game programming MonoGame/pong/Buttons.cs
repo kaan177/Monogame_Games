@@ -42,7 +42,14 @@ namespace pong
 
             }
             else
-                buttonColor = Color.Green;
+            {
+                if (isPressed)
+                {
+                    buttonColor = Color.Green;
+                }
+                else
+                    buttonColor = Color.Red;
+            }
         }
         public void Draw(SpriteBatch _spriteBatch)
         {   
