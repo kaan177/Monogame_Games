@@ -21,7 +21,7 @@ namespace pong
         protected int playerId;
         int maxHealth = 3;
         int health;
-        protected int speed = 2360;
+        protected int speed = 360;
 
 
         public Player(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_content, _paddleTex, _startPosition, _pong)
