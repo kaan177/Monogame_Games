@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using pong.Content;
 
 namespace pong
@@ -15,6 +16,8 @@ namespace pong
         GameState lastGameState, gameState;
         bool isFourPlayers;
         bool isBots;
+        bool isPowerUps;
+        bool playMusic;
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -23,6 +26,7 @@ namespace pong
         Ball ball;
         Emotes emotes;
         PowerUps powerUps;
+        Song music;
 
         MainMenu mainMenu;
         GameOverScreen gameOverScreen;
@@ -42,11 +46,17 @@ namespace pong
         }
 
         protected override void LoadContent()
-        {   
+        {
+            music = Content.Load<Song>("shittyMusic");
+            MediaPlayer.Play(music);
+            MediaPlayer.IsRepeating = true;
+
             //Setting the start Game State
             gameState = GameState.MainMenu;
-            isFourPlayers = true;
-            isBots = true;
+            isFourPlayers = false;
+            isBots = false;
+            isPowerUps = false;
+            playMusic = false;
 
             //Setting helper variables
             screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
@@ -74,6 +84,17 @@ namespace pong
 
         protected override void Update(GameTime gameTime)
         {
+            if (playMusic)
+            {
+                if (MediaPlayer.State == MediaState.Stopped)
+                    MediaPlayer.Play(music);
+                if (MediaPlayer.State == MediaState.Paused)
+                    MediaPlayer.Resume();
+            }
+            else
+                if (MediaPlayer.State == MediaState.Playing)
+                    MediaPlayer.Pause();
+
             if (gameState == GameState.MainMenu)
             {
                 if (lastGameState != GameState.MainMenu)
@@ -89,27 +110,23 @@ namespace pong
                 }
                 mainMenu.Update();
                 if (mainMenu.player4ModeBut.isPressed)
-                {
                     isFourPlayers = true;
-                }
                 else
-                {
                     isFourPlayers = false;
-                }
                 if (mainMenu.botBut.isPressed)
-                {
                     isBots = true;
-                }
                 else
-                {
                     isBots = false;
-                }
+                if (mainMenu.powerUpsBut.isPressed)
+                    isPowerUps = true;
+                else
+                    isPowerUps = false;
                 if (mainMenu.startBut.isPressed)
                 {
-                    gameState = GameState.Playing; 
+                    gameState = GameState.Playing;
                     mainMenu.startBut.isPressed = false;
                 }
-                    
+
                 if (mainMenu.exitBut.isPressed)
                     Exit();
             }
@@ -153,7 +170,7 @@ namespace pong
                     powerUps.Reset();
                     foreach (Player player in players)
                     {
-                        player.ReCalculateAfterScreenChange();
+                        player.ReCalculateVariables();
                         player.GameReset();
                     }
                     if (isBots)
@@ -183,7 +200,8 @@ namespace pong
                 }
                 lastGameState = gameState;
                 ball.Update(gameTime);
-                powerUps.Update(gameTime);
+                if(isPowerUps)
+                    powerUps.Update(gameTime);
                 foreach (Player player in players)
                 {
                     player.Update(gameTime);
@@ -204,7 +222,8 @@ namespace pong
             }
             if (gameState == GameState.Playing)
             {
-                powerUps.Draw(spriteBatch);
+                if(isPowerUps)
+                    powerUps.Draw(spriteBatch);
                 ball.Draw(spriteBatch);
                 foreach (Player player in players)
                 {

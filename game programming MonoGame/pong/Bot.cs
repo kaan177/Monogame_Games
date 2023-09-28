@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
 
@@ -11,13 +12,16 @@ namespace pong
         public Bot(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong, bool _isExtremeDifficulty) : base(_startPosition, _paddleTex, _keyUp, _keyDown, _playerId, _isVertical, _content, _pong) 
         {
             isExtremeDifficulty = _isExtremeDifficulty;
-            ReCalculateAfterScreenChange();
+            ReCalculateVariables();
         }
 
         public override void Update(GameTime gameTime)
         {
-            CalculateVelocity(gameTime);
-            base.Update(gameTime);
+            if (IsAlive)
+            {
+                CalculateVelocity(gameTime);
+                base.Update(gameTime);
+            }
         }
         protected override void HandleInput()
         {
@@ -30,16 +34,16 @@ namespace pong
             switch (playerId)
             {
                 case 0:
-                    optimalPosition.X -= Width;
+                    optimalPosition.X -= Width + pong.Ball.Origin.X - origin.X;
                     break;
                 case 1:
-                    optimalPosition.X += Width;
+                    optimalPosition.X += Width + pong.Ball.Origin.X - origin.X;
                     break;
                 case 2:
-                    optimalPosition.Y -= Height;
+                    optimalPosition.Y -= Height + pong.Ball.Origin.Y - origin.Y;
                     break;
                 case 3:
-                    optimalPosition.Y += Height;
+                    optimalPosition.Y += Height + pong.Ball.Origin.Y - origin.Y;
                     break;
             }
             Vector2 moveDirection = (optimalPosition - position);
@@ -148,9 +152,9 @@ namespace pong
             }
             return optimalPosition;
         }
-        public override void ReCalculateAfterScreenChange()
+        public override void ReCalculateVariables()
         {
-            base.ReCalculateAfterScreenChange();
+            base.ReCalculateVariables();
             lineLeft = pong.Ball.Origin.X;
             lineRight = Pong.screenSize.X - pong.Ball.Origin.X;
             lineTop = pong.Ball.Origin.Y;

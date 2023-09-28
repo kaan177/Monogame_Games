@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Security.Cryptography.X509Certificates;
+using System.Security.Permissions;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +11,7 @@ namespace pong
     internal class Player : MovingGameObject
     {
         //Class variables.
-        Texture2D redHeartTex, blueHeartTex, greenHeartTex, pinkHeartTex;
+        Texture2D regularTexture ,shrunkTexture,redHeartTex, blueHeartTex, greenHeartTex, pinkHeartTex;
         Vector2 heartOrigin;
         SoundEffect damageSound;
         Keys keyup, keydown;
@@ -19,7 +21,7 @@ namespace pong
         protected int playerId;
         int maxHealth = 3;
         int health;
-        protected int speed = 360;
+        protected int speed = 2360;
 
 
         public Player(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_content, _paddleTex, _startPosition, _pong)
@@ -29,14 +31,14 @@ namespace pong
             keydown = _keyDown;
             playerId = _playerId;
             isVertical = _isVertical;
-            isAlive = true;
-            health = maxHealth;
+            shrunkTexture = _content.Load<Texture2D>("kleine_" + _paddleTex);
             redHeartTex = _content.Load<Texture2D>("hartje");
             blueHeartTex = _content.Load<Texture2D>("blueHeart");
             greenHeartTex = _content.Load<Texture2D>("greenHeart");
             pinkHeartTex = _content.Load<Texture2D>("pinkHeart");
             damageSound = _content.Load<SoundEffect>("damageSound");
             heartOrigin = new Vector2 (redHeartTex.Width, redHeartTex.Height) / 2;
+            regularTexture = texture;
 
             //offsets the start position to make up for origin offset
             switch(playerId)
@@ -54,6 +56,7 @@ namespace pong
                     startPosition.Y -= origin.Y;
                     break;
             }
+            GameReset();
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -186,26 +189,41 @@ namespace pong
         {
             isAlive = true;
             health = maxHealth;
-            position = startPosition;
+            Reset();
         }
-        public virtual void ReCalculateAfterScreenChange()
+        public void Shrink()
+        {
+            texture = shrunkTexture;
+            origin = new Vector2(Width, Height) / 2f;
+            ReCalculateVariables();
+        }
+        public void UnShrink()
+        {
+            texture = regularTexture;
+            origin = new Vector2(Width, Height) / 2f;
+            ReCalculateVariables();
+        }
+        public virtual void ReCalculateVariables()
         {
             switch (playerId)
             {
                 case 0:
                     startPosition = new Vector2(origin.X, Pong.screenSize.Y / 2);
+                    position.X = startPosition.X;
                     break;
                 case 1:
                     startPosition = new Vector2(Pong.screenSize.X - origin.X, Pong.screenSize.Y / 2);
+                    position.X = startPosition.X;
                     break;
                 case 2:
                     startPosition = new Vector2(Pong.screenSize.X / 2, origin.Y);
+                    position.Y = startPosition.Y;
                     break;
                 case 3:
                     startPosition = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y - origin.Y);
+                    position.Y = startPosition.Y;
                     break;
             }
-
         }
 
         public bool IsAlive

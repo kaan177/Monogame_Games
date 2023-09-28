@@ -25,7 +25,7 @@ namespace pong
             hitSound = _content.Load<SoundEffect>("paddleHitSound");
             edgeHitSound = _content.Load<SoundEffect>("edgeHitSound");
             borderHitSound = _content.Load<SoundEffect>("borderHitSound");
-            speedMultiplier = 1.03f;
+            speedMultiplier = 1.02f;
             startSpeed = 320f;
             playerAngleScaler = 0.5f;
             flickerTime = 0.33f;
@@ -39,6 +39,16 @@ namespace pong
             }
             else
             {
+                if (pong.PowerUps.ActivePowerUp == PowerUps.PowerUp.swerve)
+                {
+                    float currentSpeed = velocity.Length();
+                    float directionAngle;
+                    directionAngle = (float)Math.Atan2(velocity.Y, velocity.X);
+                    directionAngle += 50f / currentSpeed * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 15f);
+                    velocity = new Vector2(MathF.Cos(directionAngle), MathF.Sin(directionAngle));
+                    velocity.Normalize();
+                    velocity *= currentSpeed;
+                }
                 base.Update(gameTime);
                 CheckCollision(gameTime);
             }
@@ -64,7 +74,7 @@ namespace pong
                 }
                 if (CheckVerticalBorders() || CheckHorizontalBorders())
                     checkForCollisions = true;
-                if(pong.PowerUps.IsActive)
+                if(pong.PowerUps.IsVisible)
                     CheckPowerUps();
             }
         }
@@ -76,6 +86,7 @@ namespace pong
                 if (position.X <= -origin.X)
                 {
                     Reset();
+                    pong.PowerUps.Reset();
                     foreach (Player player in pong.Players)
                     {
                         player.Reset();
@@ -86,6 +97,7 @@ namespace pong
                 if (position.X >= Pong.screenSize.X + origin.X)
                 {
                     Reset();
+                    pong.PowerUps.Reset();
                     foreach (Player player in pong.Players)
                     {
                         player.Reset();
@@ -115,6 +127,7 @@ namespace pong
                             pong.Players[0].TakeDamage(1);
                             pong.Players[4].TakeDamage(1);
                             Reset();
+                            pong.PowerUps.Reset();
                             foreach (Player player in pong.Players)
                             {
                                 player.Reset();
@@ -131,6 +144,7 @@ namespace pong
                             pong.Players[1].TakeDamage(1);
                             pong.Players[5].TakeDamage(1);
                             Reset();
+                            pong.PowerUps.Reset();
                             foreach (Player player in pong.Players)
                             {
                                 player.Reset();
@@ -174,6 +188,7 @@ namespace pong
                         pong.Players[2].TakeDamage(1);
                         pong.Players[6].TakeDamage(1);
                         Reset();
+                        pong.PowerUps.Reset();
                         foreach (Player player in pong.Players)
                         {
                             player.Reset();
@@ -190,6 +205,7 @@ namespace pong
                         pong.Players[3].TakeDamage(1);
                         pong.Players[7].TakeDamage(1);
                         Reset();
+                        pong.PowerUps.Reset();
                         foreach (Player player in pong.Players)
                         {
                             player.Reset();
