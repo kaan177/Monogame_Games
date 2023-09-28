@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.Serialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
@@ -7,11 +8,12 @@ namespace pong
 {
     class Bot : Player
     {
+        Vector2 optimalPosition;
+        Vector2 lastBallDirection;
+        int previousLastPlayerHit;
         float lineLeft, lineRight, lineTop, lineBottom;
-        bool isExtremeDifficulty;
-        public Bot(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong, bool _isExtremeDifficulty) : base(_startPosition, _paddleTex, _keyUp, _keyDown, _playerId, _isVertical, _content, _pong) 
+        public Bot(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_startPosition, _paddleTex, _keyUp, _keyDown, _playerId, _isVertical, _content, _pong) 
         {
-            isExtremeDifficulty = _isExtremeDifficulty;
             ReCalculateVariables();
         }
 
@@ -21,30 +23,72 @@ namespace pong
             {
                 CalculateVelocity(gameTime);
                 base.Update(gameTime);
+                previousLastPlayerHit = pong.Ball.LastPlayerHit;
+                lastBallDirection = pong.Ball.Position - pong.Ball.LastPosition;
             }
         }
         protected override void HandleInput()
         {
             //not needed for a bot
         }
+        public override void Reset()
+        {
+            base.Reset();
+            optimalPosition = position;
+            previousLastPlayerHit = -1;
+        }
 
         public void CalculateVelocity(GameTime gameTime)
         {
-            Vector2 optimalPosition = CalculateOptimalPosition();
-            switch (playerId)
+            bool ballJustStartedMoving = lastBallDirection == Vector2.Zero && (pong.Ball.Position != pong.Ball.LastPosition);
+            bool ballIsSwerving = pong.PowerUps.ActivePowerUp == PowerUps.PowerUp.swerve;
+            if (previousLastPlayerHit != pong.Ball.LastPlayerHit || ballIsSwerving || ballJustStartedMoving)
             {
-                case 0:
-                    optimalPosition.X -= Width + pong.Ball.Origin.X - origin.X;
-                    break;
-                case 1:
-                    optimalPosition.X += Width + pong.Ball.Origin.X - origin.X;
-                    break;
-                case 2:
-                    optimalPosition.Y -= Height + pong.Ball.Origin.Y - origin.Y;
-                    break;
-                case 3:
-                    optimalPosition.Y += Height + pong.Ball.Origin.Y - origin.Y;
-                    break;
+                optimalPosition = CalculateOptimalPosition();
+                if (pong.IsExtremeDifficulty)
+                {
+                    if (!ballIsSwerving)
+                    {
+                        int coinFlip = Pong.Random.Next(0, 2);
+                        if (IsVertical)
+                        {
+                            if (coinFlip == 0)
+                                optimalPosition.Y += origin.Y * 0.9f;
+                            else
+                                optimalPosition.Y -= origin.Y * 0.9f;
+                        }
+                        else
+                        {
+                            if (coinFlip == 0)
+                                optimalPosition.X += origin.X * 0.9f;
+                            else
+                                optimalPosition.X -= origin.X * 0.9f;
+                        }
+                    }
+                }
+                else
+                {
+                    float randomNegativeIncludedFloat = Pong.Random.NextSingle() * 2f - 1;
+                    if (IsVertical)
+                        optimalPosition.Y += randomNegativeIncludedFloat * 1.35f * origin.Y;
+                    else
+                        optimalPosition.X += randomNegativeIncludedFloat * 1.35f * origin.X;
+                }
+                switch (playerId)
+                {
+                    case 0:
+                        optimalPosition.X -= Width + pong.Ball.Origin.X - origin.X;
+                        break;
+                    case 1:
+                        optimalPosition.X += Width + pong.Ball.Origin.X - origin.X;
+                        break;
+                    case 2:
+                        optimalPosition.Y -= Height + pong.Ball.Origin.Y - origin.Y;
+                        break;
+                    case 3:
+                        optimalPosition.Y += Height + pong.Ball.Origin.Y - origin.Y;
+                        break;
+                }
             }
             Vector2 moveDirection = (optimalPosition - position);
             if (moveDirection.Length() <= speed * (float)gameTime.ElapsedGameTime.TotalSeconds)
@@ -75,6 +119,9 @@ namespace pong
                             return new Vector2(ballPosition.X, lineTop);
                         case 3:
                             return new Vector2(ballPosition.X, lineBottom);
+                        default:
+                            Debug.WriteLine("playerId out of range");
+                            return Vector2.Zero;
                     }
                 }
                 collisionPosition = CollisionHelper.VerticalIntersection(ballPosition, direction, lineLeft, lineTop, lineBottom, null);
@@ -148,6 +195,10 @@ namespace pong
                     case 3:
                         optimalPosition = new Vector2(ballPosition.X, lineBottom);
                         break;
+                    default:
+                        Debug.WriteLine("playerId out of range");
+                        optimalPosition = Vector2.Zero;
+                        break;
                 }
             }
             return optimalPosition;
@@ -172,6 +223,25 @@ namespace pong
                     break;
                 case 3:
                     lineBottom -= Height;
+                    break;
+                default:
+                    Debug.WriteLine("playerId out of range");
+                    break;  
+            }
+            optimalPosition = CalculateOptimalPosition();
+            switch (playerId)
+            {
+                case 0:
+                    optimalPosition.X -= Width + pong.Ball.Origin.X - origin.X;
+                    break;
+                case 1:
+                    optimalPosition.X += Width + pong.Ball.Origin.X - origin.X;
+                    break;
+                case 2:
+                    optimalPosition.Y -= Height + pong.Ball.Origin.Y - origin.Y;
+                    break;
+                case 3:
+                    optimalPosition.Y += Height + pong.Ball.Origin.Y - origin.Y;
                     break;
             }
         }

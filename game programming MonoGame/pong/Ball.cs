@@ -18,7 +18,7 @@ namespace pong
         int totalFlickers;
         bool flicker, renderBall;
 
-        int lastPaddleHit;
+        int lastPlayerHit;
 
         public Ball(Vector2 _startPosition, ContentManager _content, Pong _pong) : base(_content, "ball", _startPosition, _pong)
         {
@@ -336,7 +336,7 @@ namespace pong
                 position += velocity * lostDistance;
                 velocity *= currentSpeed;
 
-                lastPaddleHit = player.PlayerId;
+                lastPlayerHit = player.PlayerId;
                 return true;
             }
             return false;
@@ -348,7 +348,7 @@ namespace pong
             Vector2? boxIntersection = CollisionHelper.BoxIntersection(lastPosition, position - lastPosition, topLeftBound, bottomRightBound, 1f);
             if (boxIntersection.HasValue) 
             {
-                pong.PowerUps.GetHit(lastPaddleHit);
+                pong.PowerUps.GetHit(lastPlayerHit);
             }
         }
         public override void Reset()
@@ -404,9 +404,9 @@ namespace pong
         {
             get { return lastPosition; }
         }
-       public int LastPaddleHit
+       public int LastPlayerHit
         {
-            get { return lastPaddleHit;}
+            get { return lastPlayerHit;}
         }
     }
 }

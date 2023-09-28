@@ -14,6 +14,7 @@ namespace pong
         Vector2 CenterOfScreen;
 
         GameState lastGameState, gameState;
+        bool isExtremeDifficulty;
         bool isFourPlayers;
         bool isBots;
         bool isPowerUps;
@@ -57,6 +58,7 @@ namespace pong
             isBots = false;
             isPowerUps = false;
             playMusic = false;
+            isExtremeDifficulty = false;
 
             //Setting helper variables
             screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
@@ -76,10 +78,10 @@ namespace pong
             players[1] = new Player(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.Up, Keys.Down, 1, true, Content, this);
             players[2] = new Player(new Vector2(screenSize.X / 2, 0), "groeneSpeler", Keys.D2, Keys.D1, 2, false, Content, this);
             players[3] = new Player(new Vector2(screenSize.X / 2, screenSize.Y), "rozeSpeler", Keys.D0, Keys.D9, 3, false, Content, this);
-            players[4] = new Bot(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.A, Keys.A, 0, true, Content, this, true);
-            players[5] = new Bot(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.A, Keys.A, 1, true, Content, this, true);
-            players[6] = new Bot(new Vector2(screenSize.X / 2, 0), "groeneSpeler", Keys.A, Keys.A, 2, false, Content, this, true);
-            players[7] = new Bot(new Vector2(screenSize.X / 2, screenSize.Y), "rozeSpeler", Keys.A, Keys.A, 3, false, Content, this, true);
+            players[4] = new Bot(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.A, Keys.A, 0, true, Content, this);
+            players[5] = new Bot(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.A, Keys.A, 1, true, Content, this);
+            players[6] = new Bot(new Vector2(screenSize.X / 2, 0), "groeneSpeler", Keys.A, Keys.A, 2, false, Content, this);
+            players[7] = new Bot(new Vector2(screenSize.X / 2, screenSize.Y), "rozeSpeler", Keys.A, Keys.A, 3, false, Content, this);
         }
 
         protected override void Update(GameTime gameTime)
@@ -349,6 +351,10 @@ namespace pong
         public bool IsBots
         {
             get { return isBots; }
+        }
+        public bool IsExtremeDifficulty
+        {
+            get { return isExtremeDifficulty; }
         }
         public static Random Random
         {
