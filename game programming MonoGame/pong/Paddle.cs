@@ -203,6 +203,13 @@ namespace pong
             origin = new Vector2(Width, Height) / 2f;
             ReCalculateVariables();
         }
+        public void HealthUp()
+        {
+            if (!(health == maxHealth))
+            {
+                health++;
+            }
+        }
         public virtual void ReCalculateVariables()
         {
             switch (playerId)

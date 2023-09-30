@@ -6,14 +6,14 @@ namespace pong
 {
     internal class PowerUps : GameObject
     {
-        public enum PowerUp {swerve , shrink, none}
+        public enum PowerUp {swerve , shrink, heart, none}
         PowerUp powerUp;
-        Texture2D overlayTexture, wobbleTexture, shrinkTexture;
+        Texture2D overlayTexture, wobbleTexture, shrinkTexture, hearthTexture;
         float nextPowerUpTime, nextResetTime;
         float resetDuration;
 
         const float interval = 10f;
-        const float swerveDuration = 5f, shrinkDuration = 7f;
+        const float swerveDuration = 5f, shrinkDuration = 7f, healthDuration = 0f;
         bool isActive, isVisible;
         bool nextPowerUpTimerNeedsReset;
         bool applyPowerUpTimerNeedsReset;
@@ -21,6 +21,7 @@ namespace pong
         {
             wobbleTexture = _content.Load<Texture2D>("swerve");
             shrinkTexture = _content.Load<Texture2D>("shrink");
+            hearthTexture = _content.Load<Texture2D>("heartPowerupOverlay");
             isActive = false;
             nextPowerUpTimerNeedsReset = true;
             applyPowerUpTimerNeedsReset = false;
@@ -49,7 +50,7 @@ namespace pong
             }
             if (totalSeconds > nextPowerUpTime && !isVisible && !isActive)
             {
-                switch (Pong.Random.Next(0, 2))
+                switch (Pong.Random.Next(0, 3))
                 {
                     case 0:
                         powerUp = PowerUp.swerve;
@@ -59,6 +60,10 @@ namespace pong
                         powerUp = PowerUp.shrink;
                         overlayTexture = shrinkTexture;
                     break;
+                    case 2:
+                        powerUp = PowerUp.heart;
+                        overlayTexture = hearthTexture;
+                        break;
                 }
                 isVisible = true;
                 SetRandomPosition();
@@ -105,6 +110,19 @@ namespace pong
                     player.Shrink();
             }
         }
+        void ApplyHealth(int lastPaddle)
+        {
+
+            applyPowerUpTimerNeedsReset = true;
+            resetDuration = healthDuration;
+            isActive = true;
+            foreach(Player player in pong.Players)
+            {
+                if (player.PlayerId == lastPaddle)
+                    player.HealthUp();
+            }
+
+        }
         public void GetHit(int lastPaddle)
         {
             isVisible = false;
@@ -115,6 +133,9 @@ namespace pong
                     break;
                 case PowerUp.shrink:
                     ApplyShrink(lastPaddle);
+                    break;
+                case PowerUp.heart:
+                    ApplyHealth(lastPaddle);
                     break;
             }
         }
