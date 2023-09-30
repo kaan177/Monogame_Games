@@ -135,8 +135,10 @@ namespace pong
 
             if (gameState == GameState.GameOver)
             {
-                if (lastGameState != gameState)
+                if (lastGameState != GameState.GameOver)
+                {
                     IsMouseVisible = true;
+                }
                 lastGameState = gameState;
                 gameOverScreen.Update();
                 emotes.HandleInput(gameTime);

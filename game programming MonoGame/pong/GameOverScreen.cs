@@ -35,19 +35,29 @@ namespace pong
             //The position of the ui elements are based on fractions of the total screen lenght and screen height
             buttonSize = new Vector2(buttonTex.Width, buttonTex.Height);
 
-            mainMenuPos = new Vector2(Pong.screenSize.X/3, Pong.screenSize.Y/5 * 3) - buttonSize/2;
-            replayPos = new Vector2(Pong.screenSize.X / 3 * 2, Pong.screenSize.Y / 5 * 3) - buttonSize / 2;
+            mainMenuPos = new Vector2(Pong.screenSize.X/5, Pong.screenSize.Y/5 * 3) - buttonSize/2;
+            replayPos = new Vector2(Pong.screenSize.X / 5 * 3, Pong.screenSize.Y / 5 * 3) - buttonSize/2;
             
             mainMenuText = "Main menu";
             replayText = "Play again";
 
-            mainMenuBut = new Button(mainMenuPos, buttonSize, mainMenuText, buttonTex, standardFont, false);
-            replayBut = new Button(replayPos, buttonSize, replayText, buttonTex, standardFont, false);
+            mainMenuBut = new Button(mainMenuPos, buttonSize, mainMenuText, buttonTex, standardFont, Color.Green, Color.Green);
+            replayBut = new Button(replayPos, buttonSize, replayText, buttonTex, standardFont, Color.Green, Color.Green);
         }
 
         public void Update()
-        {   
+        {
             //Updating the buttons
+            if (Pong.screenSize.X == 480) 
+            {
+                mainMenuBut.UpdatePosition(new Vector2(Pong.screenSize.X / 10 * 3, Pong.screenSize.Y / 5 * 3) - buttonSize / 2);
+                replayBut.UpdatePosition(new Vector2(Pong.screenSize.X / 10 * 7, Pong.screenSize.Y / 5 * 3) - buttonSize / 2);
+            }
+            else
+            {
+                mainMenuBut.UpdatePosition(new Vector2(Pong.screenSize.X / 3, Pong.screenSize.Y / 5 * 3) - buttonSize / 2);
+                replayBut.UpdatePosition(new Vector2(Pong.screenSize.X / 3 * 2, Pong.screenSize.Y / 5 * 3) - buttonSize / 2);
+            }
             mainMenuBut.Update();
             replayBut.Update();
         }

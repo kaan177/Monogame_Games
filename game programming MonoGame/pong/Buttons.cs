@@ -7,30 +7,31 @@ namespace pong
     internal class Button
     {   
         MouseState mouse, previousMouse;
-        Vector2 topLeftPosition, textPosition;
+        Vector2 topLeftPosition, textPosition, size;
         string buttonText;
         public bool isPressed;
-        bool multiColorTexture;
         Texture2D buttonTexture;
         Rectangle mouseDetector;
         SpriteFont standardFont;
-        Color buttonColor;
+        Color isPressedCol, isNotPressedCol;
+        float colorHoverdFactor;
 
-        public Button(Vector2 _topLeftPoint, Vector2 _size, string _buttonText, Texture2D _buttonTexture, SpriteFont _standardFont, bool _multiColorTexture)
+        public Button(Vector2 _topLeftPoint, Vector2 _size, string _buttonText, Texture2D _buttonTexture, SpriteFont _standardFont, Color _isPressedCol, Color _isNotPressedCol)
         {
 
             //Loading and setting standard variables
-            topLeftPosition = _topLeftPoint;
             buttonText = _buttonText;
             buttonTexture = _buttonTexture;
             standardFont = _standardFont;
-            multiColorTexture = _multiColorTexture;
+            isPressedCol = _isPressedCol;
+            isNotPressedCol = _isNotPressedCol;
+            size = _size;
 
+            topLeftPosition = _topLeftPoint;
             mouseDetector = new Rectangle(_topLeftPoint.ToPoint(), _size.ToPoint());
             textPosition = mouseDetector.Center.ToVector2() - standardFont.MeasureString(buttonText) / 2; //Centering the text in the rectangle
             isPressed = false;
-            buttonColor = Color.Green;
-            multiColorTexture = _multiColorTexture;
+            colorHoverdFactor = 0.5f;
         }
         public void Update()
         {
@@ -39,32 +40,37 @@ namespace pong
             mouse = Mouse.GetState();
             if (mouseDetector.Contains(mouse.Position))
             {
-                buttonColor = Color.Blue;
+                colorHoverdFactor = 1.0f;
                 if (mouse.LeftButton == ButtonState.Pressed && previousMouse.LeftButton != ButtonState.Pressed)
                     isPressed = !isPressed;
 
             }
             else
             {
-                if (isPressed)
-                {
-                    buttonColor = Color.Green;
-                }
-                else
-                    buttonColor = Color.Red;
+                colorHoverdFactor = 0.5f;
             }
+            
         }
         public void Draw(SpriteBatch _spriteBatch)
         {   
-            //Drawing the button texture and the text withi
-            //n
-            if(multiColorTexture)
-                _spriteBatch.Draw(buttonTexture, topLeftPosition, new Color(buttonColor.R * 0.1f, buttonColor.G * 0.1f, buttonColor.B * 0.1f, 255));
+            //Drawing the button texture and the text
+            if (isPressed) 
+            { 
+                _spriteBatch.Draw(buttonTexture, topLeftPosition, isPressedCol * colorHoverdFactor);
+            }
             else
-                _spriteBatch.Draw(buttonTexture, topLeftPosition, buttonColor);
+            {
+                _spriteBatch.Draw(buttonTexture, topLeftPosition, isNotPressedCol * colorHoverdFactor);
+            }
             _spriteBatch.DrawString(standardFont, buttonText, textPosition, Color.Black);
         }
+        public void UpdatePosition(Vector2 position)
+        {
+            topLeftPosition = position;
+            mouseDetector = new Rectangle(topLeftPosition.ToPoint(), size.ToPoint());
+            textPosition = mouseDetector.Center.ToVector2() - standardFont.MeasureString(buttonText) / 2;
 
+        }
 
     }
 }

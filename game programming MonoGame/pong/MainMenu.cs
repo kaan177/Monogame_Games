@@ -37,7 +37,7 @@ namespace pong
             powerUpsPos = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 6 * 3) - buttonSize / 2;
             botPos = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 6 * 4) - buttonSize / 2;
             startPos = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 6 * 5) - buttonSize / 2;
-            exitPos = new Vector2(0,0);
+            exitPos = new Vector2(Pong.screenSize.X,0) - new Vector2(exitTex.Width, 0);
 
             player4ModeStr = "4 player";
             powerUpsStr = "Power Ups";
@@ -45,11 +45,11 @@ namespace pong
             startStr = "Start";
             exitStr = "";
 
-            player4ModeBut = new Button(player4ModePos, buttonSize, player4ModeStr, buttonTex, _standardFont, false);
-            powerUpsBut = new Button(powerUpsPos, buttonSize, powerUpsStr, buttonTex, _standardFont, false);
-            botBut = new Button(botPos, buttonSize, botStr, buttonTex, _standardFont, false);
-            startBut = new Button(startPos, buttonSize, startStr, buttonTex, _standardFont, false);
-            exitBut = new Button(exitPos, buttonSize, exitStr, exitTex, _standardFont,  true);
+            player4ModeBut = new Button(player4ModePos, buttonSize, player4ModeStr, buttonTex, _standardFont, Color.Green, Color.Red);
+            powerUpsBut = new Button(powerUpsPos, buttonSize, powerUpsStr, buttonTex, _standardFont, Color.Green, Color.Red);
+            botBut = new Button(botPos, buttonSize, botStr, buttonTex, _standardFont, Color.Green, Color.Red);
+            startBut = new Button(startPos, buttonSize, startStr, buttonTex, _standardFont, Color.Green, Color.Green);
+            exitBut = new Button(exitPos, buttonSize, exitStr, exitTex, _standardFont, Color.Blue, Color.Blue);
 
             gameNamePosition = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 6) - standardFont.MeasureString(gameName) / 2;
 
