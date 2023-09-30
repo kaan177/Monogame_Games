@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.Serialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
@@ -10,11 +9,13 @@ namespace pong
     {
         Vector2 optimalPosition;
         Vector2 lastBallDirection;
+        bool optimalFound;
         int previousLastPlayerHit;
         float lineLeft, lineRight, lineTop, lineBottom;
         public Bot(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_startPosition, _paddleTex, _keyUp, _keyDown, _playerId, _isVertical, _content, _pong) 
         {
             ReCalculateVariables();
+            optimalFound = false;
         }
 
         public override void Update(GameTime gameTime)
@@ -42,7 +43,7 @@ namespace pong
         {
             bool ballJustStartedMoving = lastBallDirection == Vector2.Zero && (pong.Ball.Position != pong.Ball.LastPosition);
             bool ballIsSwerving = pong.PowerUps.ActivePowerUp == PowerUps.PowerUp.swerve;
-            if (previousLastPlayerHit != pong.Ball.LastPlayerHit || ballIsSwerving || ballJustStartedMoving)
+            if (previousLastPlayerHit != pong.Ball.LastPlayerHit || ballIsSwerving || ballJustStartedMoving || !optimalFound)
             {
                 optimalPosition = CalculateOptimalPosition();
                 if (pong.IsExtremeDifficulty)
@@ -130,6 +131,7 @@ namespace pong
                     if (playerId == 0)
                     {
                         optimalPosition = collisionPosition.Value;
+                        optimalFound =  true;
                         break;
                     }
                     else
@@ -144,6 +146,7 @@ namespace pong
                     if (playerId == 1)
                     {
                         optimalPosition = collisionPosition.Value;
+                        optimalFound = true;
                         break;
                     }
                     else
@@ -158,6 +161,7 @@ namespace pong
                     if (playerId == 2)
                     {
                         optimalPosition = collisionPosition.Value;
+                        optimalFound = true;
                         break;
                     }
                     else
@@ -172,6 +176,7 @@ namespace pong
                     if (playerId == 3)
                     {
                         optimalPosition = collisionPosition.Value;
+                        optimalFound = true;
                         break;
                     }
                     else
@@ -180,6 +185,8 @@ namespace pong
                         ballPosition = collisionPosition.Value;            
                     }
                 }
+                optimalFound = false;
+                
                 //this switch is so that the optimal position will be following the ball if the loop hasn't found anything after 100 iterations
                 switch (playerId)
                 {
