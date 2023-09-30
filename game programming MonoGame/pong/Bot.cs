@@ -10,12 +10,12 @@ namespace pong
         Vector2 optimalPosition;
         Vector2 lastBallDirection;
         bool optimalFound;
+        bool previousUpdaateBotsOnValueSwap;
         int previousLastPlayerHit;
         float lineLeft, lineRight, lineTop, lineBottom;
         public Bot(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_startPosition, _paddleTex, _keyUp, _keyDown, _playerId, _isVertical, _content, _pong) 
         {
             ReCalculateVariables();
-            optimalFound = false;
         }
 
         public override void Update(GameTime gameTime)
@@ -24,6 +24,7 @@ namespace pong
             {
                 CalculateVelocity(gameTime);
                 base.Update(gameTime);
+                previousUpdaateBotsOnValueSwap = pong.Ball.UpdateBotsOnValueSwap;
                 previousLastPlayerHit = pong.Ball.LastPlayerHit;
                 lastBallDirection = pong.Ball.Position - pong.Ball.LastPosition;
             }
@@ -36,14 +37,16 @@ namespace pong
         {
             base.Reset();
             optimalPosition = position;
+            previousUpdaateBotsOnValueSwap = false;
             previousLastPlayerHit = -1;
+            optimalFound = true;
         }
 
         public void CalculateVelocity(GameTime gameTime)
         {
             bool ballJustStartedMoving = lastBallDirection == Vector2.Zero && (pong.Ball.Position != pong.Ball.LastPosition);
             bool ballIsSwerving = pong.PowerUps.ActivePowerUp == PowerUps.PowerUp.swerve;
-            if (previousLastPlayerHit != pong.Ball.LastPlayerHit || ballIsSwerving || ballJustStartedMoving || !optimalFound)
+            if (previousLastPlayerHit != pong.Ball.LastPlayerHit || previousUpdaateBotsOnValueSwap != pong.Ball.UpdateBotsOnValueSwap || ballIsSwerving || ballJustStartedMoving || !optimalFound)
             {
                 optimalPosition = CalculateOptimalPosition();
                 if (pong.IsExtremeDifficulty)
@@ -71,9 +74,9 @@ namespace pong
                 {
                     float randomNegativeIncludedFloat = Pong.Random.NextSingle() * 2f - 1;
                     if (IsVertical)
-                        optimalPosition.Y += randomNegativeIncludedFloat * 1.35f * origin.Y;
+                        optimalPosition.Y += randomNegativeIncludedFloat * 1.1f * origin.Y + pong.Ball.Origin.X;
                     else
-                        optimalPosition.X += randomNegativeIncludedFloat * 1.35f * origin.X;
+                        optimalPosition.X += randomNegativeIncludedFloat * 1.1f * origin.X + pong.Ball.Origin.X;
                 }
                 switch (playerId)
                 {
