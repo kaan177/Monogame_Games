@@ -115,10 +115,28 @@ namespace pong
                     isFourPlayers = true;
                 else
                     isFourPlayers = false;
-                if (mainMenu.botBut.isPressed)
+                if (mainMenu.botEasyBut.isPressed)
                     isBots = true;
                 else
                     isBots = false;
+                if (mainMenu.botHardBut.isPressed)
+                {
+                    if (!isBots)
+                    {
+                        mainMenu.botHardBut.isPressed = false;
+                    }
+                    else
+                    {
+                        isExtremeDifficulty = true; 
+                    }
+                }
+                    
+                else
+                    isExtremeDifficulty = false;
+                if (mainMenu.musicBut.isPressed)
+                    playMusic = true;
+                else
+                    playMusic = false;
                 if (mainMenu.powerUpsBut.isPressed)
                     isPowerUps = true;
                 else
