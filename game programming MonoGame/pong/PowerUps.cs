@@ -1,14 +1,20 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics.Tracing;
+using Microsoft.VisualBasic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SharpDX.MediaFoundation;
 
 namespace pong
 {
     internal class PowerUps : GameObject
     {
-        public enum PowerUp {swerve , shrink, none}
+        public enum PowerUp {swerve , shrink, shield, none}
+        public enum Shield { leftShield, rightShield, topShield, bottomShield, none}
         PowerUp powerUp;
-        Texture2D overlayTexture, wobbleTexture, shrinkTexture;
+        Shield activeShield;
+        Texture2D overlayTexture, wobbleTexture, shrinkTexture, shieldOverlayTexture;
+        Texture2D shieldVerticalTexture, shieldHorizontalTexture;
         float nextPowerUpTime, nextResetTime;
         float resetDuration;
 
@@ -19,8 +25,12 @@ namespace pong
         bool applyPowerUpTimerNeedsReset;
         public PowerUps(ContentManager _content, string _textureString, Vector2 _startPosition, Pong _pong) : base(_content, _textureString, _startPosition, _pong)
         {
+
             wobbleTexture = _content.Load<Texture2D>("swerve");
             shrinkTexture = _content.Load<Texture2D>("shrink");
+            shieldVerticalTexture = _content.Load<Texture2D>("verticalShield");
+            shieldHorizontalTexture = _content.Load<Texture2D>("horizontalShield");
+            shieldOverlayTexture = _content.Load<Texture2D>("shieldOverlay");
             isActive = false;
             nextPowerUpTimerNeedsReset = true;
             applyPowerUpTimerNeedsReset = false;
@@ -49,16 +59,20 @@ namespace pong
             }
             if (totalSeconds > nextPowerUpTime && !isVisible && !isActive)
             {
-                switch (Pong.Random.Next(0, 2))
+                switch (Pong.Random.Next(2, 3))
                 {
                     case 0:
                         powerUp = PowerUp.swerve;
                         overlayTexture = wobbleTexture;
-                    break;
+                        break;
                     case 1:
                         powerUp = PowerUp.shrink;
                         overlayTexture = shrinkTexture;
-                    break;
+                        break;
+                    case 2:
+                        powerUp = PowerUp.shield;
+                        overlayTexture = shieldOverlayTexture;
+                        break;
                 }
                 isVisible = true;
                 SetRandomPosition();
@@ -71,12 +85,28 @@ namespace pong
                 base.Draw(spriteBatch);
                 spriteBatch.Draw(overlayTexture, position - origin, Color.White);
             }
+            switch (activeShield)
+            {
+                case Shield.leftShield:
+                    spriteBatch.Draw(shieldVerticalTexture, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(1, Pong.screenSize.Y), SpriteEffects.None, 0f);
+                    break;
+                case Shield.rightShield:
+                    spriteBatch.Draw(shieldVerticalTexture, new Vector2(Pong.screenSize.X - shieldVerticalTexture.Width, 0f), null, Color.White, 0f, Vector2.Zero, new Vector2(1, Pong.screenSize.Y), SpriteEffects.None, 0f);
+                    break;
+                case Shield.topShield:
+                    spriteBatch.Draw(shieldHorizontalTexture, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, new Vector2(Pong.screenSize.X, 1), SpriteEffects.None, 0f);
+                    break;
+                case Shield.bottomShield:
+                    spriteBatch.Draw(shieldHorizontalTexture, new Vector2(0f , Pong.screenSize.Y - shieldHorizontalTexture.Height), null, Color.White, 0f, Vector2.Zero, new Vector2(Pong.screenSize.X, 1), SpriteEffects.None, 0f);
+                    break;
+            }
         }
         public override void Reset()
         {
             nextPowerUpTimerNeedsReset = true;
             isActive = false;
             isVisible = false;
+            activeShield = Shield.none;
             if (powerUp == PowerUp.shrink)
                 foreach (Player player in pong.Players)
                     player.UnShrink();
@@ -105,6 +135,29 @@ namespace pong
                     player.Shrink();
             }
         }
+        void ApplyShield(int lastPaddle)
+        {
+            nextPowerUpTimerNeedsReset = true;
+            switch (lastPaddle) 
+            {
+                case 0:
+                    activeShield = Shield.leftShield;
+                    break;
+                case 1:
+                    activeShield = Shield.rightShield;
+                    break;
+                case 2:
+                    activeShield = Shield.topShield;
+                    break;
+                case 3:
+                    activeShield = Shield.bottomShield;
+                    break;
+            }
+        }
+        public void BreakShield()
+        {
+            activeShield = Shield.none;
+        }
         public void GetHit(int lastPaddle)
         {
             isVisible = false;
@@ -115,6 +168,9 @@ namespace pong
                     break;
                 case PowerUp.shrink:
                     ApplyShrink(lastPaddle);
+                    break;
+                case PowerUp.shield:
+                    ApplyShield(lastPaddle);
                     break;
             }
         }
@@ -139,6 +195,10 @@ namespace pong
                 else 
                     return PowerUp.none;
             }
+        }
+        public Shield ActiveShield
+        {
+            get { return activeShield; }
         }
     }
 }
