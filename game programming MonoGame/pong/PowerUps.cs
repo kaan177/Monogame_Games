@@ -9,17 +9,17 @@ namespace pong
 {
     internal class PowerUps : GameObject
     {
-        public enum PowerUp {swerve , shrink, shield, none}
+        public enum PowerUp {swerve , shrink, shield, heart, none}
         public enum Shield { leftShield, rightShield, topShield, bottomShield, none}
         PowerUp powerUp;
         Shield activeShield;
-        Texture2D overlayTexture, wobbleTexture, shrinkTexture, shieldOverlayTexture;
+        Texture2D overlayTexture, wobbleTexture, shrinkTexture, shieldOverlayTexture, hearthTexture;
         Texture2D shieldVerticalTexture, shieldHorizontalTexture;
         float nextPowerUpTime, nextResetTime;
         float resetDuration;
 
         const float interval = 10f;
-        const float swerveDuration = 5f, shrinkDuration = 7f;
+        const float swerveDuration = 5f, shrinkDuration = 7f, healthDuration = 0f;
         bool isActive, isVisible;
         bool nextPowerUpTimerNeedsReset;
         bool applyPowerUpTimerNeedsReset;
@@ -31,6 +31,7 @@ namespace pong
             shieldVerticalTexture = _content.Load<Texture2D>("verticalShield");
             shieldHorizontalTexture = _content.Load<Texture2D>("horizontalShield");
             shieldOverlayTexture = _content.Load<Texture2D>("shieldOverlay");
+            hearthTexture = _content.Load<Texture2D>("heartPowerupOverlay");
             isActive = false;
             nextPowerUpTimerNeedsReset = true;
             applyPowerUpTimerNeedsReset = false;
@@ -59,7 +60,7 @@ namespace pong
             }
             if (totalSeconds > nextPowerUpTime && !isVisible && !isActive)
             {
-                switch (Pong.Random.Next(0, 3))
+                switch (Pong.Random.Next(0, 4))
                 {
                     case 0:
                         powerUp = PowerUp.swerve;
@@ -68,8 +69,12 @@ namespace pong
                     case 1:
                         powerUp = PowerUp.shrink;
                         overlayTexture = shrinkTexture;
-                        break;
+                    break;
                     case 2:
+                        powerUp = PowerUp.heart;
+                        overlayTexture = hearthTexture;
+                        break;
+                    case 3:
                         powerUp = PowerUp.shield;
                         overlayTexture = shieldOverlayTexture;
                         break;
@@ -158,6 +163,19 @@ namespace pong
         {
             activeShield = Shield.none;
         }
+        void ApplyHealth(int lastPaddle)
+        {
+
+            applyPowerUpTimerNeedsReset = true;
+            resetDuration = healthDuration;
+            isActive = true;
+            foreach(Player player in pong.Players)
+            {
+                if (player.PlayerId == lastPaddle)
+                    player.HealthUp();
+            }
+
+        }
         public void GetHit(int lastPaddle)
         {
             isVisible = false;
@@ -171,6 +189,9 @@ namespace pong
                     break;
                 case PowerUp.shield:
                     ApplyShield(lastPaddle);
+                    break;
+                case PowerUp.heart:
+                    ApplyHealth(lastPaddle);
                     break;
             }
         }
