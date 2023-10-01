@@ -69,7 +69,7 @@ namespace pong
                     case 1:
                         powerUp = PowerUp.shrink;
                         overlayTexture = shrinkTexture;
-                    break;
+                        break;
                     case 2:
                         powerUp = PowerUp.heart;
                         overlayTexture = hearthTexture;
