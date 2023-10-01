@@ -112,6 +112,7 @@ namespace pong
             isActive = false;
             isVisible = false;
             activeShield = Shield.none;
+            powerUp = PowerUp.none;
             if (powerUp == PowerUp.shrink)
                 foreach (Player player in pong.Players)
                     player.UnShrink();

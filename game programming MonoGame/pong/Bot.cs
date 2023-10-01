@@ -9,9 +9,7 @@ namespace pong
     {
         Vector2 optimalPosition;
         Vector2 lastBallDirection;
-        bool optimalFound;
-        bool previousUpdaateBotsOnValueSwap;
-        int previousLastPlayerHit;
+        bool needsVelocityRecalculation;
         float lineLeft, lineRight, lineTop, lineBottom;
         public Bot(Vector2 _startPosition, string _paddleTex, Keys _keyUp, Keys _keyDown, int _playerId, bool _isVertical, ContentManager _content, Pong _pong) : base(_startPosition, _paddleTex, _keyUp, _keyDown, _playerId, _isVertical, _content, _pong) 
         {
@@ -24,8 +22,6 @@ namespace pong
             {
                 CalculateVelocity(gameTime);
                 base.Update(gameTime);
-                previousUpdaateBotsOnValueSwap = pong.Ball.UpdateBotsOnValueSwap;
-                previousLastPlayerHit = pong.Ball.LastPlayerHit;
                 lastBallDirection = pong.Ball.Position - pong.Ball.LastPosition;
             }
         }
@@ -37,16 +33,13 @@ namespace pong
         {
             base.Reset();
             optimalPosition = position;
-            previousUpdaateBotsOnValueSwap = false;
-            previousLastPlayerHit = -1;
-            optimalFound = true;
         }
 
         public void CalculateVelocity(GameTime gameTime)
         {
             bool ballJustStartedMoving = lastBallDirection == Vector2.Zero && (pong.Ball.Position != pong.Ball.LastPosition);
             bool ballIsSwerving = pong.PowerUps.ActivePowerUp == PowerUps.PowerUp.swerve;
-            if (previousLastPlayerHit != pong.Ball.LastPlayerHit || previousUpdaateBotsOnValueSwap != pong.Ball.UpdateBotsOnValueSwap || ballIsSwerving || ballJustStartedMoving || !optimalFound)
+            if (needsVelocityRecalculation || ballIsSwerving || ballJustStartedMoving)
             {
                 optimalPosition = CalculateOptimalPosition();
                 if (pong.IsExtremeDifficulty)
@@ -74,9 +67,9 @@ namespace pong
                 {
                     float randomNegativeIncludedFloat = Pong.Random.NextSingle() * 2f - 1;
                     if (IsVertical)
-                        optimalPosition.Y += randomNegativeIncludedFloat * 1.1f * origin.Y + pong.Ball.Origin.X;
+                        optimalPosition.Y += randomNegativeIncludedFloat * 1.15f * origin.Y + pong.Ball.Origin.X;
                     else
-                        optimalPosition.X += randomNegativeIncludedFloat * 1.1f * origin.X + pong.Ball.Origin.X;
+                        optimalPosition.X += randomNegativeIncludedFloat * 1.15f * origin.X + pong.Ball.Origin.X;
                 }
                 switch (playerId)
                 {
@@ -134,7 +127,7 @@ namespace pong
                     if (playerId == 0)
                     {
                         optimalPosition = collisionPosition.Value;
-                        optimalFound =  true;
+                        needsVelocityRecalculation =  false;
                         break;
                     }
                     else
@@ -149,7 +142,7 @@ namespace pong
                     if (playerId == 1)
                     {
                         optimalPosition = collisionPosition.Value;
-                        optimalFound = true;
+                        needsVelocityRecalculation = false;
                         break;
                     }
                     else
@@ -164,7 +157,7 @@ namespace pong
                     if (playerId == 2)
                     {
                         optimalPosition = collisionPosition.Value;
-                        optimalFound = true;
+                        needsVelocityRecalculation = false;
                         break;
                     }
                     else
@@ -179,7 +172,7 @@ namespace pong
                     if (playerId == 3)
                     {
                         optimalPosition = collisionPosition.Value;
-                        optimalFound = true;
+                        needsVelocityRecalculation = false;
                         break;
                     }
                     else
@@ -188,7 +181,6 @@ namespace pong
                         ballPosition = collisionPosition.Value;            
                     }
                 }
-                optimalFound = false;
                 
                 //this switch is so that the optimal position will be following the ball if the loop hasn't found anything after 100 iterations
                 switch (playerId)
@@ -254,6 +246,10 @@ namespace pong
                     optimalPosition.Y += Height + pong.Ball.Origin.Y - origin.Y;
                     break;
             }
+        }
+        public bool NeedsVelocityRecalculation
+        {
+            set { needsVelocityRecalculation = value; }
         }
     }
 }
