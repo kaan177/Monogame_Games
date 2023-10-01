@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,7 +12,7 @@ namespace pong
         Texture2D regularTexture ,shrunkTexture,redHeartTex, blueHeartTex, greenHeartTex, pinkHeartTex;
         Vector2 heartOrigin;
         SoundEffect damageSound;
-        Keys keyup, keydown;
+        Keys keyup, keydown, keyupStore, keydownStore;
         KeyboardState keyboard;
         bool isVertical;
         bool isAlive;
@@ -29,6 +27,8 @@ namespace pong
             //Constructing variables.        
             keyup = _keyUp;
             keydown = _keyDown;
+            keyupStore = _keyUp;
+            keydownStore = _keyDown;
             playerId = _playerId;
             isVertical = _isVertical;
             shrunkTexture = _content.Load<Texture2D>("kleine_" + _paddleTex);
@@ -209,6 +209,16 @@ namespace pong
             {
                 health++;
             }
+        }
+        public void ReverseControls()
+        {
+            keyup = keydownStore;
+            keydown = keyupStore;
+        }
+        public void ResetControls()
+        {
+            keyup = keyupStore;
+            keydown = keydownStore;
         }
         public virtual void ReCalculateVariables()
         {
