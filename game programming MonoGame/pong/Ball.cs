@@ -8,6 +8,7 @@ namespace pong
 {
     internal class Ball : MovingGameObject
     {
+        //The class Ball is responsible for moving and displaying the ball, as well as handling all collisions between the ball, players and power ups
         SoundEffect hitSound, edgeHitSound, borderHitSound;
 
         //variables for adjusting the feel of the game
@@ -31,6 +32,9 @@ namespace pong
             flickerTime = 0.33f;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+
         public override void Update(GameTime gameTime)
         {
             if (flicker == true)
@@ -39,41 +43,63 @@ namespace pong
             }
             else
             {
+                //check if the ball should swerve
                 if (pong.PowerUps.ActivePowerUp == PowerUps.PowerUp.swerve)
                 {
+                    //save the current speed
                     float currentSpeed = velocity.Length();
-                    float directionAngle;
-                    directionAngle = (float)Math.Atan2(velocity.Y, velocity.X);
+
+                    //save the current angle
+                    float directionAngle = (float)Math.Atan2(velocity.Y, velocity.X);
+
+                    //calculate a new angle with a Sin based on the totalseconds
                     directionAngle += 50f / currentSpeed * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 15f);
+
+                    //calculate the new velocity direction based of the result of the sin calculation 
                     velocity = new Vector2(MathF.Cos(directionAngle), MathF.Sin(directionAngle));
                     velocity.Normalize();
+
+                    //set the velocity back to its initial speed
                     velocity *= currentSpeed;
                 }
+                //update the position and last position
                 base.Update(gameTime);
+                
+                //check for collisions
                 CheckCollision(gameTime);
             }
         }
 
+        //draw the ball if it should be drawn based on renderBall which is altered in method  Flicker()
         public override void Draw(SpriteBatch spriteBatch)
         {
             if (renderBall)
                 base.Draw(spriteBatch);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+        //Code to check for all the types of collisions, if any of the collision checks return true all collisions should be checked again with the updated last position and position from that collision
         void CheckCollision(GameTime _gameTime)
         {
-            //Code to check for all the types of collisions, if any of the collision checks return true all collisions should be checked again with the updated last position and position from the collision
             bool checkForCollisions = true;
             while (checkForCollisions)
             {
+                //standard behaviour stop looping
                 checkForCollisions = false;
+
+                //check all alive/active players 
                 foreach (Player player in pong.Players)
                 {
                     if (player.IsAlive)
                         if (CheckPaddle(player))
                         {
+                            //make sure to check for new collisions afterwards as CheckPaddle has been called and it has collided so the last position and position of ball have been updated
                             checkForCollisions = true;
                             foreach(Player potentialBot in pong.Players)
                             {
+                                //let the bots recalculate their optimal position as the direction of the ball has changed
                                 if(potentialBot is Bot)
                                 {
                                     Bot bot = (Bot)potentialBot;
@@ -84,9 +110,11 @@ namespace pong
                 }
                 if (CheckVerticalBorders() || CheckHorizontalBorders())
                 {
+                    //make sure to check for new collisions afterwards as Check Borders have been called and the ball has collided so the last position and position of ball have been updated
                     checkForCollisions = true;
                     foreach (Player potentialBot in pong.Players)
                     {
+                        //let the bots recalculate their optimal position as the direction of the ball has changed
                         if (potentialBot is Bot)
                         {
                             Bot bot = (Bot)potentialBot;
@@ -94,10 +122,14 @@ namespace pong
                         }
                     }
                 }
+                //check for collisions with the power up object if it is visible
                 if (pong.PowerUps.IsVisible)
                     CheckPowerUps();
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
 
         bool CheckVerticalBorders()
         {
@@ -106,12 +138,13 @@ namespace pong
             Vector2? intersectionLeft = CollisionHelper.VerticalIntersection(lastPosition, directionVector, origin.X, null, null, 1f);
             Vector2? intersectionRight = CollisionHelper.VerticalIntersection(lastPosition, directionVector, Pong.screenSize.X - origin.X, null, null, 1f);
 
-            //Check whether a collision should occur
+            //Check whether a bounce should occur
             if (intersectionLeft.HasValue || intersectionRight.HasValue)
             {
                 Vector2 collisionPosition;
                 if (intersectionLeft.HasValue)
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = intersectionLeft.Value;
                     if ((pong.Players[0].IsAlive || pong.Players[4].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.leftShield)
                     {
@@ -132,6 +165,7 @@ namespace pong
                 }
                 else
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = intersectionRight.Value;
                     if ((pong.Players[1].IsAlive || pong.Players[5].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.rightShield)
                     {
@@ -162,12 +196,14 @@ namespace pong
 
                 return true;
             }
+
             //perform secondary check in case the more complex collision system fails, to avoid a stalemate where the ball can never collide 
             if(position.X < origin.X || position.X > Pong.screenSize.X - origin.X)
             {
                 Vector2? collisionPosition;
                 if (position.X < origin.X)
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = CollisionHelper.VerticalIntersection(position, (lastPosition - position), origin.X, origin.Y, Pong.screenSize.Y - origin.Y, null);
                     if ((pong.Players[0].IsAlive || pong.Players[4].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.leftShield || collisionPosition == null)
                     {
@@ -188,6 +224,7 @@ namespace pong
                 }
                 else
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = CollisionHelper.VerticalIntersection(position, (lastPosition - position), Pong.screenSize.X - origin.X, origin.Y, Pong.screenSize.Y - origin.Y, null);
                     if ((pong.Players[1].IsAlive || pong.Players[5].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.rightShield || collisionPosition == null)
                     {
@@ -221,6 +258,9 @@ namespace pong
             return false;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+
         bool CheckHorizontalBorders()
         {
             //create variables for checking whether the ball bounces with the side while calculating the correct collision position
@@ -234,6 +274,7 @@ namespace pong
                 Vector2 collisionPosition;
                 if (intersectionTop.HasValue)
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = intersectionTop.Value;
                     if ((pong.IsFourPlayers && pong.Players[2].IsAlive || pong.Players[6].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.topShield)
                     {
@@ -254,6 +295,7 @@ namespace pong
                 }
                 else
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = intersectionBottom.Value;
                     if ((pong.IsFourPlayers && pong.Players[3].IsAlive || pong.Players[7].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.bottomShield)
                     {
@@ -284,12 +326,14 @@ namespace pong
 
                 return true;
             }
+
             //perform secondary check in case the more complex collision system fails, to avoid a stalemate where the ball can never collide 
             if (position.Y < origin.Y || position.Y > Pong.screenSize.Y - origin.Y)
             {
                 Vector2? collisionPosition;
                 if (position.Y < origin.Y)
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = CollisionHelper.HorizontalIntersection(position, (lastPosition - position), origin.Y, origin.X, Pong.screenSize.X - origin.X, null);
                     if ((pong.Players[2].IsAlive || pong.Players[6].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.topShield || collisionPosition == null)
                     {
@@ -310,6 +354,7 @@ namespace pong
                 }
                 else
                 {
+                    //if this side has collided, check if there are players alive on that side and if there is not a shield, if so damage the player and reset the playing field
                     collisionPosition = CollisionHelper.HorizontalIntersection(position, (lastPosition - position), Pong.screenSize.Y - origin.Y, origin.X, Pong.screenSize.X - origin.X, null);
                     if ((pong.Players[3].IsAlive || pong.Players[7].IsAlive) && pong.PowerUps.ActiveShield != PowerUps.Shield.bottomShield || collisionPosition == null)
                     {
@@ -342,6 +387,9 @@ namespace pong
             }
             return false;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------
 
         bool CheckPaddle(Player player)
         {
@@ -403,7 +451,7 @@ namespace pong
                     //bounce
                     velocity.Y = -velocity.Y;
 
-                    //check for collision near edge of player
+                    //check for collision near edge of player, if so the ball should be directed towards the side of that edge
                     float distanceToMiddle = (player.OriginAdjustedPosition.X + player.Width / 2 - collisionPosition.X);
                     if (Math.Abs(distanceToMiddle) > player.Width / 4)
                     {
@@ -420,7 +468,7 @@ namespace pong
                     //bounce
                     velocity.X = -velocity.X;
 
-                    //check for collision near edge of player
+                    //check for collision near edge of player, if so the ball should be directed towards the side of that edge
                     float distanceToMiddle = (player.OriginAdjustedPosition.Y + player.Height / 2 - collisionPosition.Y);
                     if (Math.Abs(distanceToMiddle) > player.Height / 4)
                     {
@@ -454,6 +502,11 @@ namespace pong
             }
             return false;
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+
+        //check for collisions with the power up object
         void CheckPowerUps()
         {
             Vector2 topLeftBound = new Vector2(pong.PowerUps.Position.X - pong.PowerUps.Origin.X, pong.PowerUps.Position.Y - pong.PowerUps.Origin.Y);
@@ -461,6 +514,7 @@ namespace pong
             Vector2? boxIntersection = CollisionHelper.BoxIntersection(lastPosition, position - lastPosition, topLeftBound, bottomRightBound, 1f);
             if (boxIntersection.HasValue)
             {
+                //tell powerUps it has been hit and let it handle the power Up applying based on the last player the ball hit
                 pong.PowerUps.GetHit(lastPlayerHit);
             }
         }
@@ -490,6 +544,8 @@ namespace pong
             velocity.Normalize();
             velocity *= startSpeed;
         }
+
+        //Gives the ball a visual flickering effect
         void Flicker(GameTime gameTime)
         {
             if (gameTime.TotalGameTime.TotalSeconds > lastFlicker)
