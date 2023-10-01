@@ -84,7 +84,7 @@ namespace pong
         }
 
         protected override void Update(GameTime gameTime)
-        {
+        {   //Playing the music
             if (playMusic)
             {
                 if (MediaPlayer.State == MediaState.Stopped)
@@ -95,8 +95,9 @@ namespace pong
             else
                 if (MediaPlayer.State == MediaState.Playing)
                     MediaPlayer.Pause();
-
-            if (gameState == GameState.MainMenu)
+            //Calling Update in the different game states and switching between game states
+            
+            if (gameState == GameState.MainMenu) //Gamestate: Main Menu
             {
                 if (lastGameState != GameState.MainMenu)
                 {
@@ -139,7 +140,7 @@ namespace pong
                     Exit();
             }
 
-            if (gameState == GameState.GameOver)
+            if (gameState == GameState.GameOver) //Gamestate: Game Over
             {
                 if (lastGameState != GameState.GameOver)
                 {
@@ -161,7 +162,7 @@ namespace pong
                 }
             }
 
-            if (gameState == GameState.Playing)
+            if (gameState == GameState.Playing) //Gamestate: Playing
             {
                 if (lastGameState != gameState)
                 {
@@ -267,9 +268,9 @@ namespace pong
                     livingPlayer = player.PlayerId;
                 }
             }
-            if(isBots)
+            if(isBots) 
             {
-                if (!isFourPlayers)
+                if (!isFourPlayers)//Wanneer de game mode twee spelers is
                 {
                     if (alivePlayers <= 1)
                     {
@@ -287,7 +288,7 @@ namespace pong
                         gameState = GameState.GameOver;
                     }
                 }
-                else
+                else// Wanneer de game mode vier spelers is
                 {
                     if (!players[0].IsAlive)
                     {
@@ -324,7 +325,7 @@ namespace pong
                     }
                 }
             }
-            else
+            else//Wanneer Bots niet aan staan.
             {
                 if (alivePlayers <= 1)
                 {

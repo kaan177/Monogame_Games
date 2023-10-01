@@ -42,7 +42,6 @@ namespace pong
 
         public override void Update(GameTime gameTime)
         {
-            Debug.WriteLine(origin.ToString());
             float totalSeconds = (float)gameTime.TotalGameTime.TotalSeconds;
             if(applyPowerUpTimerNeedsReset)
             {
