@@ -1,25 +1,24 @@
-﻿using System.Diagnostics.Tracing;
-using Microsoft.VisualBasic;
+﻿using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SharpDX.MediaFoundation;
 
 namespace pong
 {
     internal class PowerUps : GameObject
     {
-        public enum PowerUp {swerve , shrink, shield, heart, none}
+        public enum PowerUp {swerve , shrink, shield, heart, reversed, none}
         public enum Shield { leftShield, rightShield, topShield, bottomShield, none}
         PowerUp powerUp;
         Shield activeShield;
-        Texture2D overlayTexture, wobbleTexture, shrinkTexture, shieldOverlayTexture, hearthTexture;
+        Texture2D overlayTexture, wobbleTexture, shrinkTexture, shieldOverlayTexture, hearthTexture, reversedTexture;
+        Texture2D blueCard, redCard, greenCard, yellowCard;
         Texture2D shieldVerticalTexture, shieldHorizontalTexture;
         float nextPowerUpTime, nextResetTime;
         float resetDuration;
 
         const float interval = 10f;
-        const float swerveDuration = 5f, shrinkDuration = 7f, healthDuration = 0f;
+        const float swerveDuration = 5f, shrinkDuration = 7f, healthDuration = 0f, reversedDuration = 7f;
         bool isActive, isVisible;
         bool nextPowerUpTimerNeedsReset;
         bool applyPowerUpTimerNeedsReset;
@@ -32,6 +31,10 @@ namespace pong
             shieldHorizontalTexture = _content.Load<Texture2D>("horizontalShield");
             shieldOverlayTexture = _content.Load<Texture2D>("shieldOverlay");
             hearthTexture = _content.Load<Texture2D>("heartPowerupOverlay");
+            blueCard = _content.Load<Texture2D>("ReverseBlue");
+            redCard = _content.Load<Texture2D>("ReverseRed");
+            greenCard = _content.Load<Texture2D>("ReverseGreen");
+            yellowCard = _content.Load<Texture2D>("ReverseYellow");
             isActive = false;
             nextPowerUpTimerNeedsReset = true;
             applyPowerUpTimerNeedsReset = false;
@@ -51,6 +54,9 @@ namespace pong
                 if (powerUp == PowerUp.shrink)
                     foreach (Player player in pong.Players)
                         player.UnShrink();
+                if (powerUp == PowerUp.reversed)
+                    foreach (Player player in pong.Players)
+                        player.ResetControls();
                 nextPowerUpTimerNeedsReset = true;
             }
             if (nextPowerUpTimerNeedsReset)
@@ -60,7 +66,7 @@ namespace pong
             }
             if (totalSeconds > nextPowerUpTime && !isVisible && !isActive)
             {
-                switch (Pong.Random.Next(0, 4))
+                switch (Pong.Random.Next(0, 5))
                 {
                     case 0:
                         powerUp = PowerUp.swerve;
@@ -77,6 +83,11 @@ namespace pong
                     case 3:
                         powerUp = PowerUp.shield;
                         overlayTexture = shieldOverlayTexture;
+                        break;
+                    case 4:
+                        powerUp = PowerUp.reversed;
+                        RandomUnoReverseCard();
+                        overlayTexture = reversedTexture;
                         break;
                 }
                 isVisible = true;
@@ -116,6 +127,9 @@ namespace pong
             if (powerUp == PowerUp.shrink)
                 foreach (Player player in pong.Players)
                     player.UnShrink();
+            if (powerUp == PowerUp.reversed)
+                foreach (Player player in pong.Players)
+                    player.ResetControls();
         }
         void SetRandomPosition()
         {
@@ -177,6 +191,38 @@ namespace pong
             }
 
         }
+        void ApplyReversed(int lastPaddle)
+        {
+            applyPowerUpTimerNeedsReset = true;
+            resetDuration = reversedDuration;
+            isActive = true;
+            foreach (Player player in pong.Players)
+            {
+                if (player.PlayerId == lastPaddle)
+                    player.ReverseControls();
+            }
+        }
+        void RandomUnoReverseCard()
+        {
+            switch (Pong.Random.Next(0, 4))
+            {
+                case 0:
+                    reversedTexture = blueCard;
+                    break;
+                case 1:
+                    reversedTexture = redCard;
+                    break;
+                case 2:
+                    reversedTexture = greenCard;
+                    break;
+                case 3:
+                    reversedTexture = yellowCard;
+                    break;
+
+            }
+                
+
+        }
         public void GetHit(int lastPaddle)
         {
             isVisible = false;
@@ -193,6 +239,9 @@ namespace pong
                     break;
                 case PowerUp.heart:
                     ApplyHealth(lastPaddle);
+                    break;
+                case PowerUp.reversed:
+                    ApplyReversed(lastPaddle);
                     break;
             }
         }
