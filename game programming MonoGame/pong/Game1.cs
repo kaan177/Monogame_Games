@@ -149,7 +149,9 @@ namespace pong
                 }
                 lastGameState = gameState;
                 gameOverScreen.Update();
-                emotes.HandleInput(gameTime);
+                if (!isFourPlayers)
+                    emotes.HandleInput(gameTime);
+
                 if (gameOverScreen.replayBut.isPressed)
                 {
                     gameState = GameState.Playing; 
@@ -218,7 +220,8 @@ namespace pong
                 {
                     player.Update(gameTime);
                 }
-                emotes.HandleInput(gameTime);
+                if (!isFourPlayers)
+                    emotes.HandleInput(gameTime);
             }
         }
 
