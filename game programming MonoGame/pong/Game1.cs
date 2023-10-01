@@ -6,6 +6,7 @@ CONTROLS:
     AroowUp/ArrowDown: Blue player
     1/2: Green player
     9/0: Magenta player
+    e/numpad 7: Emotes for Red player and Blue player
 
 This verion of pong has several optional game modes.
 
@@ -53,12 +54,14 @@ namespace pong
         Vector2 CenterOfScreen;
 
         GameState lastGameState, gameState;
+        // The different game mode stettings
         bool isExtremeDifficulty;
         bool isFourPlayers;
         bool isBots;
         bool isPowerUps;
         bool playMusic;
 
+        //Helper variables
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         SpriteFont standardFont;
@@ -68,15 +71,18 @@ namespace pong
         PowerUps powerUps;
         Song music;
 
+        //The diiferent UI screens
         MainMenu mainMenu;
         GameOverScreen gameOverScreen;
 
+        //Initializing pong
         static void Main()
         {
             Pong game = new Pong();
             game.Run();
         }
 
+        //Pong constructor
         public Pong()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -85,8 +91,10 @@ namespace pong
             IsMouseVisible = true;
         }
 
+        //Loading and creating different objects, textures, varaibles.
         protected override void LoadContent()
         {
+            //Loading in the music
             music = Content.Load<Song>("shittyMusic");
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = 0.3f;
@@ -104,15 +112,17 @@ namespace pong
             CenterOfScreen = new Vector2(screenSize.X, screenSize.Y) / 2;
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            //Loading the font.
             standardFont = Content.Load<SpriteFont>("standardFont");
 
-            //instantiating objects.
+            //Instantiating objects.
             ball = new Ball(screenSize / 2, Content, this);
             emotes = new Emotes(Content);
             powerUps = new PowerUps(Content, "powerUp", Vector2.Zero, this);
             mainMenu = new MainMenu(standardFont, Content);
             gameOverScreen = new GameOverScreen(standardFont, Content);
 
+            //Instanitiating the players and the bots
             players[0] = new Player(new Vector2(0, screenSize.Y / 2), "rodeSpeler", Keys.W, Keys.S, 0, true, Content, this);
             players[1] = new Player(new Vector2(screenSize.X, screenSize.Y / 2), "blauweSpeler", Keys.Up, Keys.Down, 1, true, Content, this);
             players[2] = new Player(new Vector2(screenSize.X / 2, 0), "groeneSpeler", Keys.D2, Keys.D1, 2, false, Content, this);
@@ -137,10 +147,12 @@ namespace pong
             else
                 if (MediaPlayer.State == MediaState.Playing)
                     MediaPlayer.Pause();
+
             //Calling Update in the different game states and switching between game states
             
             if (gameState == GameState.MainMenu) //Gamestate: Main Menu
             {
+                //Setting variables and settings when entering the main menu
                 if (lastGameState != GameState.MainMenu)
                 {
                     IsMouseVisible = true;
@@ -152,7 +164,10 @@ namespace pong
                         CenterOfScreen = screenSize / 2;
                     }
                 }
+                //Updating main menu.
                 mainMenu.Update();
+
+                //Setting the settings.
                 isFourPlayers = mainMenu.player4ModeBut.isPressed;
                 isBots = mainMenu.botEasyBut.isPressed;
                 playMusic = mainMenu.musicBut.isPressed;
@@ -172,6 +187,7 @@ namespace pong
                 else
                     isExtremeDifficulty = false;
 
+                //Switching the game state if the start button is pressed.
                 if (mainMenu.startBut.isPressed)
                 {
                     gameState = GameState.Playing;
@@ -184,21 +200,26 @@ namespace pong
 
             if (gameState == GameState.GameOver) //Gamestate: Game Over
             {
+                //Setting variables and settings when entering the Game Over state
                 if (lastGameState != GameState.GameOver)
                 {
                     IsMouseVisible = true;
                 }
                 lastGameState = gameState;
                 gameOverScreen.Update();
+
+                //Enable emotes only in two player mode.
                 if (!isFourPlayers)
                     emotes.HandleInput(gameTime);
 
+                //Switching to Playing state when replay button is pressed.
                 if (gameOverScreen.replayBut.isPressed)
                 {
                     gameState = GameState.Playing; 
                     gameOverScreen.replayBut.isPressed = false;
                 }
 
+                //Switching to Main Menu state when main menu button is pressed.
                 if (gameOverScreen.mainMenuBut.isPressed)
                 {
                     gameState = GameState.MainMenu; 
@@ -208,6 +229,7 @@ namespace pong
 
             if (gameState == GameState.Playing) //Gamestate: Playing
             {
+                //Setting variables and settings when entering the Playing state
                 if (lastGameState != gameState)
                 {
                     //make the playing field square if in 4 player mode
@@ -220,6 +242,7 @@ namespace pong
                     screenSize = new Vector2(graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
                     CenterOfScreen = screenSize / 2;
 
+                    //Reseting the ball, powerups and players.
                     ball.ReCalculateStartPosition();
                     ball.Reset();
                     powerUps.Reset();
@@ -228,7 +251,8 @@ namespace pong
                         player.ReCalculateVariables();
                         player.GameReset();
                     }
-                    if (isBots)
+                    //Turning on and off the players and bots depending on if the bots are enabled.
+                    if (isBots)//Bots on
                     {
                         for(int i = 1; i < 5; i++)
                         {
@@ -240,7 +264,7 @@ namespace pong
                             players[7].IsAlive = false;
                         }
                     }
-                    else
+                    else//Bots off
                     {
                         for (int i = 4; i < 8; i++)
                         {
@@ -254,6 +278,7 @@ namespace pong
                     }
                 }
                 lastGameState = gameState;
+                //Updating the ball, powerups and players.
                 ball.Update(gameTime);
                 if(isPowerUps)
                     powerUps.Update(gameTime);
@@ -261,6 +286,8 @@ namespace pong
                 {
                     player.Update(gameTime);
                 }
+
+                //Enable emotes only in two player mode
                 if (!isFourPlayers)
                     emotes.HandleInput(gameTime);
             }
@@ -270,10 +297,12 @@ namespace pong
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
         protected override void Draw(GameTime gameTime)
         {
+            //Making the Background black and removing all previous sprites.
             GraphicsDevice.Clear(Color.Black);
+            //Begining the proces of drawing all the sprites
             spriteBatch.Begin();
 
-            //Drawing the different Game States
+            //Drawing the different Game States and its different components.
             if (gameState == GameState.MainMenu)
             {
                 mainMenu.Draw(spriteBatch);
@@ -300,12 +329,13 @@ namespace pong
             }
 
             spriteBatch.End();
+            //Ending the drawing proces
         }
 //--------------------CHECK GAME OVER METHOD-----------------------------------------------------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         public void CheckGameOver()
         {
-            //game over call only results in the game being over if only one player is alive
+            //Collecting information about which and how many players are still alive.
             int alivePlayers = 0;
             int livingPlayer = 0;
             foreach (Player player in players)
@@ -318,7 +348,7 @@ namespace pong
             }
             if(isBots) 
             {
-                if (!isFourPlayers)//Wanneer de game mode twee spelers is
+                if (!isFourPlayers)//When the game mode is two players
                 {
                     if (alivePlayers <= 1)
                     {
@@ -365,7 +395,7 @@ namespace pong
                         }
                         gameState = GameState.GameOver;
                     }
-                    else if(alivePlayers <=1)
+                    else if(alivePlayers <=1)//When the player has won from the bots
                     {
                         gameOverScreen.victoryText = "Game Over: Red wins!";
                         gameOverScreen.victoryCol = Color.Red;
@@ -373,7 +403,7 @@ namespace pong
                     }
                 }
             }
-            else//Wanneer Bots niet aan staan.
+            else//When bots are disabled.
             {
                 if (alivePlayers <= 1)
                 {
