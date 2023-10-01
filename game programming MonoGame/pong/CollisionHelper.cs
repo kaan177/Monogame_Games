@@ -4,6 +4,8 @@ namespace pong
 {
     public static class CollisionHelper
     {
+        //The class collisionHelper is accesible to all classes as it contains handy methods for checking collisions and finding the intersection of lines, Ball uses it for collisions and Bot uses it for calculating its optimal position.
+
         public static Vector2? VerticalIntersection(Vector2 supportVector, Vector2 directionVector, float xCoordinate, float? minY, float? maxY, float? maxLambda)
         {
             //Check if directionVector.X is not zero(it would break the code and it would never collide with the Y axis anyways)
@@ -81,7 +83,7 @@ namespace pong
             //create local Variables for setting the right collision position and telling if a collision has occurred  
             Vector2? collisionPosition = null;
 
-            //instantiate floats with a large value assigned
+            //instantiate floats with a large value assigned so that they will not be the smallest distance when left unassigned
             float distance1 = 100000f;
             float distance2 = 100000f;
             float distance3 = 100000f;

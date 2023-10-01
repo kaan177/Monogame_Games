@@ -10,6 +10,8 @@ namespace pong.Content
 {
     internal class Emotes
     {
+        //Class that handles emoting, emote textures are displayed and sounds are played based on user input.
+
         Texture2D hihihihahTexture;
         SoundEffect hihihahSound;  
         Vector2 drawLocation;
