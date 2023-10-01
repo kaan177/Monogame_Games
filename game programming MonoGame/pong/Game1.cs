@@ -110,14 +110,11 @@ namespace pong
                     }
                 }
                 mainMenu.Update();
-                if (mainMenu.player4ModeBut.isPressed)
-                    isFourPlayers = true;
-                else
-                    isFourPlayers = false;
-                if (mainMenu.botEasyBut.isPressed)
-                    isBots = true;
-                else
-                    isBots = false;
+                isFourPlayers = mainMenu.player4ModeBut.isPressed;
+                isBots = mainMenu.botEasyBut.isPressed;
+                playMusic = mainMenu.musicBut.isPressed;
+                isPowerUps = mainMenu.powerUpsBut.isPressed;
+
                 if (mainMenu.botHardBut.isPressed)
                 {
                     if (!isBots)
@@ -129,17 +126,9 @@ namespace pong
                         isExtremeDifficulty = true; 
                     }
                 }
-                    
                 else
                     isExtremeDifficulty = false;
-                if (mainMenu.musicBut.isPressed)
-                    playMusic = true;
-                else
-                    playMusic = false;
-                if (mainMenu.powerUpsBut.isPressed)
-                    isPowerUps = true;
-                else
-                    isPowerUps = false;
+
                 if (mainMenu.startBut.isPressed)
                 {
                     gameState = GameState.Playing;

@@ -67,7 +67,7 @@ namespace pong
             }
             if (totalSeconds > nextPowerUpTime && !isVisible && !isActive)
             {
-                switch (Pong.Random.Next(4, 5))
+                switch (Pong.Random.Next(0, 5))
                 {
                     case 0:
                         powerUp = PowerUp.swerve;
