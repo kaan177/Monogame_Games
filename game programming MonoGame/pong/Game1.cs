@@ -49,7 +49,6 @@ namespace pong
         protected override void LoadContent()
         {
             music = Content.Load<Song>("shittyMusic");
-            MediaPlayer.Play(music);
             MediaPlayer.IsRepeating = true;
 
             //Setting the start Game State
