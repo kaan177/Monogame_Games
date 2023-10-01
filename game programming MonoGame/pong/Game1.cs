@@ -1,4 +1,43 @@
-﻿using System;
+﻿/*
+This code implements the game of pong
+
+CONTROLS:
+    w/s: Red player
+    AroowUp/ArrowDown: Blue player
+    1/2: Green player
+    9/0: Magenta player
+
+This verion of pong has several optional game modes.
+
+* Four player mode is activated by the isFourPlayers boolean. 
+    When four player mode is activated the screen shrinks to a cube and two extra players are spawned on the top and bottem of the screen.
+   
+
+* The bots mode replaces all players except the red player with bots
+    Bots mode is activated by the isBots boolean
+    When bots mode is on extreme difficulty can be selected for even harder bots
+
+* The powerups mode enables powerups to randomly spawn on the screen.
+    If the ball hits them the powerup is apllied to either the last player or the ball or all other players.
+    The powerups are handeled by the PowerUps class.
+
+GAME STATES
+Game states are switched in the update method.
+
+*Main Menu
+    The main menu consists of a couple of buttons which allow the different game modes to be selected.
+    When the start button is pressed the game state is switched to Playing
+
+*Playing
+    When the Playing state is active the players and bal are drawn and updated.
+    When a Player wins the game state transitions to Game Over
+
+*Game Over
+    This game state has two buttons and a text that displays who has won
+    The replay button switches back to the Playing state, and the main menu button switches to the Main Menu state
+
+*/
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -84,6 +123,8 @@ namespace pong
             players[7] = new Bot(new Vector2(screenSize.X / 2, screenSize.Y), "rozeSpeler", Keys.A, Keys.A, 3, false, Content, this);
         }
 
+//--------------------- UPDATE METHOD ----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
         protected override void Update(GameTime gameTime)
         {   //Playing the music
             if (playMusic)
@@ -225,6 +266,8 @@ namespace pong
             }
         }
 
+//--------------------- DRAW METHOD ----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
@@ -258,7 +301,8 @@ namespace pong
 
             spriteBatch.End();
         }
-
+//--------------------CHECK GAME OVER METHOD-----------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         public void CheckGameOver()
         {
             //game over call only results in the game being over if only one player is alive

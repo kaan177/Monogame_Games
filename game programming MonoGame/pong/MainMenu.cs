@@ -24,7 +24,7 @@ namespace pong
 
         public MainMenu(SpriteFont _standardFont, ContentManager _content) 
         {   
-            //Loading and setting standard variables
+            //Loading and setting textures and fonts
             standardFont = _standardFont;
             
             buttonTex = _content.Load<Texture2D>("Button");
@@ -34,6 +34,7 @@ namespace pong
             //The position of the ui elements are based on fractions of the total screen lenght and screen height
             buttonSize = new Vector2(buttonTex.Width, buttonTex.Height);
 
+            //Caculating ball positions
             player4ModePos = new Vector2(Pong.screenSize.X/2, Pong.screenSize.Y/7*2) - buttonSize/2;
             powerUpsPos = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 7 * 3) - buttonSize / 2;
             botEasyPos = new Vector2(Pong.screenSize.X / 40 * 15, Pong.screenSize.Y / 7 * 4) - buttonSize / 2;
@@ -42,6 +43,7 @@ namespace pong
             startPos = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 7 * 6) - buttonSize / 2;
             exitPos = new Vector2(Pong.screenSize.X,0) - new Vector2(exitTex.Width, 0);
 
+            //Setting button text's
             player4ModeStr = "4 player";
             powerUpsStr = "Power Ups";
             botEasyStr = "Bots";
@@ -50,6 +52,7 @@ namespace pong
             startStr = "Start";
             exitStr = "";
 
+            //Initializing the buttons
             player4ModeBut = new Button(player4ModePos, buttonSize, player4ModeStr, buttonTex, _standardFont, Color.Green, Color.Red);
             powerUpsBut = new Button(powerUpsPos, buttonSize, powerUpsStr, buttonTex, _standardFont, Color.Green, Color.Red);
             botEasyBut = new Button(botEasyPos, buttonSize, botEasyStr, buttonTex, _standardFont, Color.Green, Color.Red);
@@ -58,6 +61,7 @@ namespace pong
             startBut = new Button(startPos, buttonSize, startStr, buttonTex, _standardFont, Color.Green, Color.Green);
             exitBut = new Button(exitPos, buttonSize, exitStr, exitTex, _standardFont, Color.Blue, Color.Blue);
 
+            //Setting the game text position
             gameNamePosition = new Vector2(Pong.screenSize.X / 2, Pong.screenSize.Y / 6) - standardFont.MeasureString(gameName) / 2;
 
             
