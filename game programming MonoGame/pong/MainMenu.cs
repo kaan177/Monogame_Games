@@ -6,6 +6,7 @@ namespace pong
 {
     internal class MainMenu
     {
+
         SpriteFont standardFont;
 
         string gameName = "Pong Deluxe";
