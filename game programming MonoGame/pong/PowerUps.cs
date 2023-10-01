@@ -1,7 +1,8 @@
-﻿using System.Diagnostics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
+using System.Collections.Generic;
 
 namespace pong
 {
@@ -11,20 +12,25 @@ namespace pong
         public enum Shield { leftShield, rightShield, topShield, bottomShield, none}
         PowerUp powerUp;
         Shield activeShield;
+        SoundEffect spawnSound, pickUpSound, wobbleSound, endSound;
         Texture2D overlayTexture, wobbleTexture, shrinkTexture, shieldOverlayTexture, hearthTexture, reversedTexture;
         Texture2D blueCard, redCard, greenCard, yellowCard;
         Texture2D shieldVerticalTexture, shieldHorizontalTexture;
+        List<SoundEffectInstance> soundEffects = new List<SoundEffectInstance>();
         float nextPowerUpTime, nextResetTime;
         float resetDuration;
 
         const float interval = 10f;
-        const float swerveDuration = 5f, shrinkDuration = 7f, healthDuration = 0f, reversedDuration = 7f;
+        const float swerveDuration = 4.5f, shrinkDuration = 7f, reversedDuration = 7f;
         bool isActive, isVisible;
         bool nextPowerUpTimerNeedsReset;
         bool applyPowerUpTimerNeedsReset;
         public PowerUps(ContentManager _content, string _textureString, Vector2 _startPosition, Pong _pong) : base(_content, _textureString, _startPosition, _pong)
         {
-
+            spawnSound = _content.Load<SoundEffect>("powerUpSpawn");
+            pickUpSound = _content.Load<SoundEffect>("powerUpPickup");
+            wobbleSound = _content.Load<SoundEffect>("wobbleSound");
+            endSound = _content.Load<SoundEffect>("powerUpEnd");
             wobbleTexture = _content.Load<Texture2D>("swerve");
             shrinkTexture = _content.Load<Texture2D>("shrink");
             shieldVerticalTexture = _content.Load<Texture2D>("verticalShield");
@@ -58,6 +64,8 @@ namespace pong
                     foreach (Player player in pong.Players)
                         player.ResetControls();
                 nextPowerUpTimerNeedsReset = true;
+                soundEffects.Insert(0, endSound.CreateInstance());
+                soundEffects[0].Play();
             }
             if (nextPowerUpTimerNeedsReset)
             {
@@ -91,6 +99,8 @@ namespace pong
                         break;
                 }
                 isVisible = true;
+                soundEffects.Insert(0, spawnSound.CreateInstance());
+                soundEffects[0].Play();
                 SetRandomPosition();
             }
         }
@@ -119,6 +129,9 @@ namespace pong
         }
         public override void Reset()
         {
+            foreach(SoundEffectInstance soundEffect in soundEffects)
+                soundEffect.Stop();
+            soundEffects.Clear();
             nextPowerUpTimerNeedsReset = true;
             isActive = false;
             isVisible = false;
@@ -140,6 +153,8 @@ namespace pong
         }
         void ApplySwerve()
         {
+            soundEffects.Insert(0, wobbleSound.CreateInstance());
+            soundEffects[0].Play();
             applyPowerUpTimerNeedsReset = true;
             resetDuration = swerveDuration;
             isActive = true;
@@ -181,9 +196,7 @@ namespace pong
         void ApplyHealth(int lastPaddle)
         {
 
-            applyPowerUpTimerNeedsReset = true;
-            resetDuration = healthDuration;
-            isActive = true;
+            nextPowerUpTimerNeedsReset = true;
             foreach(Player player in pong.Players)
             {
                 if (player.PlayerId == lastPaddle)
@@ -198,7 +211,7 @@ namespace pong
             isActive = true;
             foreach (Player player in pong.Players)
             {
-                if (player.PlayerId == lastPaddle)
+                if (player.PlayerId != lastPaddle)
                     player.ReverseControls();
             }
         }
@@ -219,14 +232,14 @@ namespace pong
                     reversedTexture = yellowCard;
                     break;
 
-            }
-                
-
+            }         
         }
         public void GetHit(int lastPaddle)
         {
             isVisible = false;
-            switch(powerUp)
+            soundEffects.Insert(0, pickUpSound.CreateInstance());
+            soundEffects[0].Play();
+            switch (powerUp)
             {
                 case PowerUp.swerve:
                     ApplySwerve();

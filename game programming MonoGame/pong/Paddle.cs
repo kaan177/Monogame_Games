@@ -182,7 +182,7 @@ namespace pong
             {
                 isAlive = false;
                 //game over call only results in the game being over if only one player is alive
-                pong.GameOver();
+                pong.CheckGameOver();
             }
         }
         public void GameReset()

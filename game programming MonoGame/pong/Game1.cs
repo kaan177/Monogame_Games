@@ -50,6 +50,7 @@ namespace pong
         {
             music = Content.Load<Song>("shittyMusic");
             MediaPlayer.IsRepeating = true;
+            MediaPlayer.Volume = 0.3f;
 
             //Setting the start Game State
             gameState = GameState.MainMenu;
@@ -255,7 +256,7 @@ namespace pong
             spriteBatch.End();
         }
 
-        public void GameOver()
+        public void CheckGameOver()
         {
             //game over call only results in the game being over if only one player is alive
             int alivePlayers = 0;

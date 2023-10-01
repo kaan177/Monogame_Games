@@ -247,6 +247,24 @@
 /processorParam:TextureFormat=Color
 /build:powerUp.png
 
+#begin powerUpEnd.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:powerUpEnd.wav
+
+#begin powerUpPickup.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:powerUpPickup.wav
+
+#begin powerUpSpawn.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:powerUpSpawn.wav
+
 #begin ReverseBlue.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -379,4 +397,10 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:verticalShield.png
+
+#begin wobbleSound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:wobbleSound.wav
 
