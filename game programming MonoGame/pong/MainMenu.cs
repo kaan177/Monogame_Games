@@ -8,7 +8,7 @@ namespace pong
     {
         SpriteFont standardFont;
 
-        string gameName = "Pong";
+        string gameName = "Pong Deluxe";
         Vector2 gameNamePosition;
 
         public Button player4ModeBut, powerUpsBut, botEasyBut, botHardBut, musicBut, startBut, exitBut;
@@ -43,8 +43,8 @@ namespace pong
 
             player4ModeStr = "4 player";
             powerUpsStr = "Power Ups";
-            botEasyStr = "Bot's";
-            botHardStr = "Hard Bot's";
+            botEasyStr = "Bots";
+            botHardStr = "Hard Mode";
             musicStr = "Music";
             startStr = "Start";
             exitStr = "";
