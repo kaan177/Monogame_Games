@@ -106,6 +106,7 @@ namespace pong
             {
                 if (direction == Vector2.Zero)
                 {
+                    needsVelocityRecalculation = false;
                     switch (playerId)
                     {
                         case 0:
