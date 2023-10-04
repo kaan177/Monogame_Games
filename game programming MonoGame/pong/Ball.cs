@@ -21,7 +21,7 @@ namespace pong
 
         int lastPlayerHit;
 
-        public Ball(Vector2 _startPosition, ContentManager _content, Pong _pong) : base(_content, "ball", _startPosition, _pong)
+        public Ball(Vector2 _startPosition, ContentManager _content, Pong _pong) : base(_content, "bal", _startPosition, _pong)
         {
             hitSound = _content.Load<SoundEffect>("paddleHitSound");
             edgeHitSound = _content.Load<SoundEffect>("edgeHitSound");
